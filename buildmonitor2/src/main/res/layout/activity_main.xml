@@ -9,8 +9,31 @@
                 tools:context=".MainActivity">
 
     <TextView
-            android:text="@string/hello_world"
+            android:id="@+id/main_textview_greenyet"
+            android:text="IS THE BUILD GREEN YET?"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            />
+
+    <TextView
+            android:id="@+id/main_textview_status"
+            android:text="NOPE."
+            android:textSize="60sp"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/main_textview_greenyet"
+            />
+
+    <TextView
+            android:id="@+id/main_textview_summary"
+            android:text="Last ran 3pm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/main_textview_status"
+            android:textSize="24sp"
+            />
+
 
 </RelativeLayout>
