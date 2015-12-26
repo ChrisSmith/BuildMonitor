@@ -1,41 +1,52 @@
 package org.collegelabs.buildmonitor.buildmonitor2;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.TimeUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildAdapter;
+import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildViewModel;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
-import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.Observable;
 import timber.log.Timber;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends Activity {
-
-    @InjectView(R.id.main_textview_status) TextView _status;
-    @InjectView(R.id.main_textview_summary) TextView _summary;
+public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
+    @InjectView(android.R.id.list) ListView _listview;
 
     private Subscription _sub;
+    private BuildAdapter _adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
         ButterKnife.inject(this);
+
+        _adapter = new BuildAdapter(this, new ArrayList<>());
+        _listview.setAdapter(_adapter);
+        _listview.setOnItemClickListener(this);
+
         showLoadingView(); //set view model of some sort?
     }
 
@@ -44,12 +55,7 @@ public class MainActivity extends Activity {
         super.onStart();
 
 
-
         TeamCityService service = ServiceHelper.getService(credentials);
-
-
-        // TODO recursion so it blocks until the previous completes?
-        // http://stackoverflow.com/questions/24557153/rx-subject-and-emitting-values-periodically
 
         int pageSize = 100;
         int offset = 0;
@@ -75,49 +81,22 @@ public class MainActivity extends Activity {
     }
 
     private void showLoadingView(){
-        _summary.setText("");
-        _status.setText("Loading...");
+        _adapter.clear();
+        _adapter.add(new BuildViewModel()); // empty item for the header
     }
 
     private void UpdateUI(BuildCollectionResponse response) {
-        String status;
-        String summary = "";
 
-        if(response.builds.size() == 0){
-            status = "No Builds";
-        }else{
-            Build first = response.builds.get(0);
-            summary = TimeUtil.human(first.startDate);
+        // TODO handle 0 builds
 
-            if(first.running){
-                summary += " " + first.percentageComplete + "%";
+        ArrayList<BuildViewModel> viewModels = new ArrayList<>(response.builds.size());
 
-                switch (first.status){
-                    case "FAILURE":
-                        status = "NOPE.";
-                        break;
-                    case "SUCCESS":
-                        status = "HASN'T FAILED YET.";
-                        break;
-                    default:
-                        status = "???";
-                }
-            }else{
-                switch (first.status){
-                    case "FAILURE":
-                        status = "NOPE.";
-                        break;
-                    case "SUCCESS":
-                        status = "YUP!";
-                        break;
-                    default:
-                        status = "???";
-                }
-            }
+        for(Build b : response.builds){
+            viewModels.add(new BuildViewModel(b));
         }
 
-        _status.setText(status);
-        _summary.setText(summary);
+        _adapter.clear();
+        _adapter.addAll(viewModels);
     }
 
 
@@ -141,5 +120,15 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        BuildViewModel viewModel = _adapter.getItem(position);
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.webUrl)));
+        } catch (Exception e) {
+            Timber.e("Failed to open " + viewModel.webUrl, e);
+        }
     }
 }

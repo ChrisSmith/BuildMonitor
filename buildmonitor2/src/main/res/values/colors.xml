@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green_fill">#ff81C784</color>
+    <color name="green_stroke">#FF4CAF50</color>
+    <color name="red_stroke">#FFF44336</color>
+    <color name="red_fill">#FFE57373</color>
+    <color name="blue_stroke">#ff03A9F4</color>
+    <color name="blue_fill">#ff4FC3F7</color>
+    <color name="yellow_stroke">#FFFFEB3B</color>
+    <color name="yellow_fill">#FFFFF176</color>
+</resources>

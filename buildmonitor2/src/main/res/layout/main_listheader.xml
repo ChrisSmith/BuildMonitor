@@ -28,7 +28,7 @@
 
     <TextView
             android:id="@+id/main_textview_summary"
-            android:text="Last ran 3pm"
+            android:text="28 minutes ago"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/main_textview_status"
