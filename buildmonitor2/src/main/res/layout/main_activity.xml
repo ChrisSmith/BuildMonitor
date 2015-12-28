@@ -4,11 +4,12 @@
                 android:layout_height="match_parent"
                 tools:context=".MainActivity">
 
-   <ListView
+   <GridView
            android:id="@android:id/list"
            android:layout_width="match_parent"
            android:layout_height="match_parent"
-           tools:listitem="@layout/build_rowitem"
-           tools:listheader="@layout/main_listheader"
+           tools:listitem="@layout/project_summary_rowitem"
+           android:columnWidth="200dp"
+           android:numColumns="auto_fit"
            />
 </RelativeLayout>

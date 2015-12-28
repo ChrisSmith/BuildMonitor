@@ -1,6 +1,7 @@
 package org.collegelabs.buildmonitor.buildmonitor2.tc;
 
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildDetailsResponse;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.ProjectResponse;
 import retrofit.http.GET;
 import retrofit.http.Path;
@@ -14,5 +15,8 @@ public interface TeamCityService {
 
     @GET("/app/rest/builds")
     Observable<BuildCollectionResponse> getBuilds(@Query("locator") String locator);
+
+    @GET("/app/rest/builds/{buildLocator}")
+    Observable<BuildDetailsResponse> getBuild(@Path("buildLocator") String locator);
 }
 

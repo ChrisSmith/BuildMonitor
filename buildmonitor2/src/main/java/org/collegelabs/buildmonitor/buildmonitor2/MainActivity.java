@@ -9,13 +9,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.GridView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildAdapter;
-import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildViewModel;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
+import org.collegelabs.buildmonitor.buildmonitor2.builds.*;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
@@ -26,16 +23,15 @@ import rx.schedulers.Schedulers;
 import rx.Observable;
 import timber.log.Timber;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
-    @InjectView(android.R.id.list) ListView _listview;
+    @InjectView(android.R.id.list) GridView _gridView;
 
     private Subscription _sub;
-    private BuildAdapter _adapter;
+    private ProjectSummaryAdapter _adapter;
 
 
     @Override
@@ -44,9 +40,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         setContentView(R.layout.main_activity);
         ButterKnife.inject(this);
 
-        _adapter = new BuildAdapter(this, new ArrayList<>());
-        _listview.setAdapter(_adapter);
-        _listview.setOnItemClickListener(this);
+        _adapter = new ProjectSummaryAdapter(this);
+        _gridView.setAdapter(_adapter);
+        _gridView.setOnItemClickListener(this);
 
         showLoadingView(); //set view model of some sort?
     }
@@ -55,22 +51,32 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     protected void onStart() {
         super.onStart();
 
-        int pageSize = 100;
-        int offset = 0;
-        String buildTypeId = "bt312";
-        String buildLocator = "buildType:" + buildTypeId + ",running:any,canceled:any,count:" + pageSize + ",start:" + offset;;
+        //String buildTypeId = "";
+        List<String> builds = new ArrayList<>();
 
-        Observable<TeamCityService> o1 = ServiceHelper.getService(BuildMonitorApplication.Db);
         final int initDelay = 0;
         final int interval = 60;
         Observable<Long> o2 = Observable.interval(initDelay, interval, TimeUnit.SECONDS);
 
-        _sub = Observable.combineLatest(o1, o2, Pair::create)
+        ArrayList<ProjectSummary> emptyList = new ArrayList<>(builds.size());
+        for (String build : builds){
+            ProjectSummary summary = new ProjectSummary();
+            summary.status = BuildStatus.Loading;
+            emptyList.add(summary);
+        }
+
+        _sub = o2.flatMap(f -> new ProjectSummaryService().getSummaries(builds))
+                .startWith(emptyList)
                 .subscribeOn(Schedulers.newThread())
-                .flatMap(x -> x.first.getBuilds(buildLocator))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"))
                 ;
+    }
+
+    private void UpdateUI(List<ProjectSummary> summaries) {
+        // TODO handle 0 builds
+        _adapter.clear();
+        _adapter.addAll(summaries);
     }
 
     @Override
@@ -85,23 +91,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     private void showLoadingView(){
         _adapter.clear();
-        _adapter.add(new BuildViewModel()); // empty item for the header
     }
-
-    private void UpdateUI(BuildCollectionResponse response) {
-
-        // TODO handle 0 builds
-
-        ArrayList<BuildViewModel> viewModels = new ArrayList<>(response.builds.size());
-
-        for(Build b : response.builds){
-            viewModels.add(new BuildViewModel(b));
-        }
-
-        _adapter.clear();
-        _adapter.addAll(viewModels);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -127,11 +117,11 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        BuildViewModel viewModel = _adapter.getItem(position);
+        ProjectSummary projectSummary = _adapter.getItem(position);
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.webUrl)));
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(projectSummary.webUrl)));
         } catch (Exception e) {
-            Timber.e("Failed to open " + viewModel.webUrl, e);
+            Timber.e("Failed to open " + projectSummary.webUrl, e);
         }
     }
 }

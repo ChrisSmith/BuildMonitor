@@ -37,6 +37,10 @@ public class TimeUtil {
     );
 
     public static String human(Date date) {
+        if(date == null){
+            return "";
+        }
+
         long ms = new Date().getTime() - date.getTime();
         return human(ms);
     }
