@@ -8,4 +8,9 @@ public class Credentials {
         this.password = password;
         this.server = server;
     }
+
+    @Override
+    public String toString() {
+        return username + " @ " + server;
+    }
 }

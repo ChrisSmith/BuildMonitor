@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,17 +55,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     protected void onStart() {
         super.onStart();
 
-
-        TeamCityService service = ServiceHelper.getService(credentials);
-
         int pageSize = 100;
         int offset = 0;
         String buildTypeId = "bt312";
         String buildLocator = "buildType:" + buildTypeId + ",running:any,canceled:any,count:" + pageSize + ",start:" + offset;;
 
-        _sub = Observable.interval(/** initial delay */ 0,  /** interval */ 60, TimeUnit.SECONDS)
+        Observable<TeamCityService> o1 = ServiceHelper.getService(BuildMonitorApplication.Db);
+        final int initDelay = 0;
+        final int interval = 60;
+        Observable<Long> o2 = Observable.interval(initDelay, interval, TimeUnit.SECONDS);
+
+        _sub = Observable.combineLatest(o1, o2, Pair::create)
                 .subscribeOn(Schedulers.newThread())
-                .flatMap(x -> service.getBuilds(buildLocator))
+                .flatMap(x -> x.first.getBuilds(buildLocator))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"))
                 ;

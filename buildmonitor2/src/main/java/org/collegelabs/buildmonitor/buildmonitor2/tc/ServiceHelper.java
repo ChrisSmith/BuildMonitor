@@ -6,13 +6,20 @@ import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
+import org.collegelabs.buildmonitor.buildmonitor2.storage.Database;
 import retrofit.RestAdapter;
 import retrofit.client.OkClient;
 import retrofit.converter.GsonConverter;
+import rx.Observable;
 
 import java.util.concurrent.TimeUnit;
 
 public class ServiceHelper {
+
+    public static Observable<TeamCityService> getService(Database db){
+        return db.GetCredentials()
+            .map(ServiceHelper::getService);
+    }
 
     public static TeamCityService getService(Credentials credentials){
         String userAndPassword = credentials.username + ":" + credentials.password;
