@@ -23,7 +23,6 @@ public class ProjectSummaryAdapter extends ArrayAdapter<ProjectSummary> {
         inflater = LayoutInflater.from(context);
     }
 
-
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         ProjectSummary item = this.getItem(position);

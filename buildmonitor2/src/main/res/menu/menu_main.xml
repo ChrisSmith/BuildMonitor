@@ -1,6 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".MainActivity">
+
+    <item android:id="@+id/action_add_build"
+          android:title="Add"
+          android:icon="@drawable/ic_add_24dp"
+          android:showAsAction="always"
+        />
+
+    <item android:id="@+id/action_edit_builds"
+        android:title="Edit"
+        android:icon="@drawable/ic_mode_edit_24dp"
+        android:showAsAction="ifRoom"
+        />
+
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
           android:orderInCategory="100"

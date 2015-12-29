@@ -1,0 +1,25 @@
+<Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/edit_build_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:contentInsetEnd="0dp"
+    android:contentInsetStart="0dp"
+    style="?android:actionBarStyle"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/actionbar_discard"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            style="?android:actionButtonStyle"
+            android:drawableStart="@drawable/ic_clear_24dp"
+            />
+
+    </LinearLayout>
+</Toolbar>

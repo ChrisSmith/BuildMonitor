@@ -12,6 +12,9 @@ import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
 import rx.Observable;
 import timber.log.Timber;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  */
 public class Database  {
@@ -25,17 +28,23 @@ public class Database  {
         Db = sqlBrite.wrapDatabaseHelper(openHelper);
     }
 
-    public long InsertCredentials(String username, String serverUrl, String password) {
+    public long insertBuildType(BuildTypeDto dto) {
+        return Db.insert(BuildTypeDto.TABLE, dto.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public long InsertCredentials(String username, String serverUrl, String password, boolean isGuest) {
 
         try {
-            CredentialStore store = new CredentialStore();
-            String encrypted = store.encrypt(password);
-
             ContentValues values = new ContentValues();
-            values.put("username", username);
             values.put("ServerUrl", serverUrl);
-            values.put("password", encrypted);
-            values.put("IsGuest", false);
+            values.put("IsGuest", isGuest);
+
+            if(!isGuest){
+                CredentialStore store = new CredentialStore();
+                String encrypted = store.encrypt(password);
+                values.put("username", username);
+                values.put("password", encrypted);
+            }
 
             return Db.insert(ServerDto.TABLE, values);
 
@@ -45,16 +54,47 @@ public class Database  {
 
     }
 
+    public Observable<List<Credentials>> GetAllCredentials(){
+        return Db.createQuery(ServerDto.TABLE, ServerDto.SELECT)
+                .mapToList(ServerDto::lift)
+                .map(servers -> {
+
+                    try {
+                        CredentialStore store = new CredentialStore();
+                        List<Credentials> result = new ArrayList<>();
+
+                        for (ServerDto dto : servers){
+                            if(dto.IsGuest){
+                                result.add(new Credentials(dto.Id, dto.ServerUrl));
+                            } else {
+                                String decrypted = store.decrypt(dto.EncryptedPassword);
+                                result.add(new Credentials(dto.Id, dto.UserName, decrypted, dto.ServerUrl));
+                            }
+                        }
+
+                        return result;
+                    } catch (CredentialException e) {
+                        Timber.e("Failed to get creds", e);
+                    }
+
+                    return null; // TODO null object pattern? how can i invoke the error path?
+                });
+    }
+
+    // TODO remove
     public Observable<Credentials> GetCredentials(){
         return Db.createQuery(ServerDto.TABLE, ServerDto.SELECT + " limit 1")
             .mapToOne(ServerDto::lift)
             .map(server -> {
 
                 try {
-                    CredentialStore store = new CredentialStore();
-                    String decrypted = store.decrypt(server.EncryptedPassword);
-                    return new Credentials(server.UserName, decrypted, server.ServerUrl);
-
+                    if(server.IsGuest){
+                        return new Credentials(server.Id, server.ServerUrl);
+                    } else {
+                        CredentialStore store = new CredentialStore();
+                        String decrypted = store.decrypt(server.EncryptedPassword);
+                        return new Credentials(server.Id, server.UserName, decrypted, server.ServerUrl);
+                    }
                 } catch (CredentialException e) {
                     Timber.e("Failed to get creds", e);
                 }
@@ -82,6 +122,19 @@ public class Database  {
                     ", Password text null" +
                     ", IsGuest int not null" +
                     ", ServerUrl text not null" +
+                    ")"
+            );
+
+            Execute(db, "create table buildType (" +
+                    "buildTypeId integer primary key autoincrement" +
+                    ", serverId integer not null" +
+                    ", buildTypeStringId text not null" +
+                    ", name text not null" +
+                    ", displayName text not null" +
+                    ", href text not null" +
+                    ", webUrl text not null" +
+                    ", projectName text not null" +
+                    ", projectId text not null" +
                     ")"
             );
         }

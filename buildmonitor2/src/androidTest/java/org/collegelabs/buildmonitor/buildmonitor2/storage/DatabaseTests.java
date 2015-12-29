@@ -28,7 +28,7 @@ public class DatabaseTests extends AndroidTestCase {
     }
 
     public void testNoCredentials() throws Exception {
-        Credentials emptyCreds = new Credentials(null, null, null);
+        Credentials emptyCreds = new Credentials(-1, null, null, null);
 
         Credentials creds = _service.GetCredentials()
                 .timeout(10, TimeUnit.MILLISECONDS, Observable.just(emptyCreds))
@@ -58,6 +58,6 @@ public class DatabaseTests extends AndroidTestCase {
     }
 
     private void GivenHasSavedCredentials(String username, String serverUrl, String password) {
-        _service.InsertCredentials(username, serverUrl, password);
+        _service.InsertCredentials(username, serverUrl, password, false);
     }
 }

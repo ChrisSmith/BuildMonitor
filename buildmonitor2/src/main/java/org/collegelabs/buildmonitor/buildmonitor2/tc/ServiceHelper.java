@@ -1,11 +1,13 @@
 package org.collegelabs.buildmonitor.buildmonitor2.tc;
 
 import android.util.Base64;
-import com.facebook.stetho.okhttp.BuildConfig;
 import com.facebook.stetho.okhttp.StethoInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.OkUrlFactory;
+import org.collegelabs.buildmonitor.buildmonitor2.BuildConfig;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.Database;
 import retrofit.RestAdapter;
 import retrofit.client.OkClient;
@@ -22,9 +24,6 @@ public class ServiceHelper {
     }
 
     public static TeamCityService getService(Credentials credentials){
-        String userAndPassword = credentials.username + ":" + credentials.password;
-        final String authHeader = "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
-
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyyMMdd'T'HHmmssZ")
                 .create();
@@ -39,14 +38,32 @@ public class ServiceHelper {
             client.networkInterceptors().add(new StethoInterceptor());
         }
 
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(credentials.server)
+        RestAdapter.Builder builder = new RestAdapter.Builder()
+                .setEndpoint(getEndpoint(credentials))
                 .setClient(new OkClient(client))
-                .setRequestInterceptor(new BasicAuthInterceptor(authHeader))
                 .setLogLevel(RestAdapter.LogLevel.BASIC)
-                .setConverter(new GsonConverter(gson))
-                .build();
+                .setRequestInterceptor(new JsonHeaderInterceptor())
+                .setConverter(new GsonConverter(gson));
 
-        return restAdapter.create(TeamCityService.class);
+        if(!credentials.isGuest){
+            String userAndPassword = credentials.username + ":" + credentials.password;
+            final String authHeader = "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
+            builder.setRequestInterceptor(new BasicAuthInterceptor(authHeader));
+        }
+
+        return builder.build().create(TeamCityService.class);
+    }
+
+    public static String getEndpoint(Credentials credentials){
+        HttpUrl.Builder endpoint = HttpUrl.parse(credentials.server).newBuilder();
+
+        if(credentials.isGuest){
+            endpoint.addPathSegment("guestAuth");
+        }
+
+        return endpoint.addPathSegment("app")
+                .addPathSegment("rest")
+                .build()
+                .toString();
     }
 }

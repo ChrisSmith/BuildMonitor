@@ -1,0 +1,26 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="org.collegelabs.buildmonitor.buildmonitor2.builds.EditBuildActivity"
+              android:orientation="vertical"
+        >
+
+    <include layout="@layout/edit_build_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <include layout="@layout/edit_build_header"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content" />
+
+    <ListView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:choiceMode="singleChoice"
+            tools:listitem="@layout/buildtype_rowitem"
+            />
+
+</LinearLayout>

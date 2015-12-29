@@ -10,13 +10,19 @@ import rx.Observable;
 
 public interface TeamCityService {
 
-    @GET("/app/rest/projects/id:{projectId}")
+    @GET("/projects/id:{projectId}")
     Observable<ProjectResponse> getProject(@Path("projectId") String projectId);
 
-    @GET("/app/rest/builds")
+    @GET("/builds")
     Observable<BuildCollectionResponse> getBuilds(@Query("locator") String locator);
 
-    @GET("/app/rest/builds/{buildLocator}")
+    @GET("/builds/{buildLocator}")
     Observable<BuildDetailsResponse> getBuild(@Path("buildLocator") String locator);
+
+    @GET("/buildTypes")
+    Observable<BuildTypeCollectionResponse> getBuildTypes();
+
+    @GET("/server")
+    Observable<ServerResponse> getServer();
 }
 
