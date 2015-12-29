@@ -18,11 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ServiceHelper {
 
-    public static Observable<TeamCityService> getService(Database db){
-        return db.GetCredentials()
-            .map(ServiceHelper::getService);
-    }
-
     public static TeamCityService getService(Credentials credentials){
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyyMMdd'T'HHmmssZ")

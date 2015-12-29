@@ -4,15 +4,20 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Pair;
+import android.util.SparseArray;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.CredentialException;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.CredentialStore;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildType;
 import rx.Observable;
 import timber.log.Timber;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
@@ -30,6 +35,33 @@ public class Database  {
 
     public long insertBuildType(BuildTypeDto dto) {
         return Db.insert(BuildTypeDto.TABLE, dto.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public Observable<List<BuildTypeWithCredentials>> getAllBuildTypesWithCreds(){
+        return Observable.combineLatest(getAllBuildTypes(), GetAllCredentials(), Pair::create)
+                .map(t -> {
+                    ArrayList<BuildTypeWithCredentials> result = new ArrayList<>();
+                    SparseArray<Credentials> credentialsById = new SparseArray<>();
+
+                    for(Credentials c : t.second){
+                        credentialsById.put(c.id, c);
+                    }
+
+                    for (BuildTypeDto buildType : t.first) {
+                        Credentials credentials = credentialsById.get(buildType.serverId);
+                        if(credentials != null){
+                            result.add(new BuildTypeWithCredentials(buildType, credentials));
+                        }
+                    }
+
+                    return result;
+                });
+    }
+
+    public Observable<List<BuildTypeDto>> getAllBuildTypes(){
+        return Db.createQuery(BuildTypeDto.TABLE, BuildTypeDto.SELECT)
+                .mapToList(BuildTypeDto::lift)
+                ;
     }
 
     public long InsertCredentials(String username, String serverUrl, String password, boolean isGuest) {
@@ -79,28 +111,6 @@ public class Database  {
 
                     return null; // TODO null object pattern? how can i invoke the error path?
                 });
-    }
-
-    // TODO remove
-    public Observable<Credentials> GetCredentials(){
-        return Db.createQuery(ServerDto.TABLE, ServerDto.SELECT + " limit 1")
-            .mapToOne(ServerDto::lift)
-            .map(server -> {
-
-                try {
-                    if(server.IsGuest){
-                        return new Credentials(server.Id, server.ServerUrl);
-                    } else {
-                        CredentialStore store = new CredentialStore();
-                        String decrypted = store.decrypt(server.EncryptedPassword);
-                        return new Credentials(server.Id, server.UserName, decrypted, server.ServerUrl);
-                    }
-                } catch (CredentialException e) {
-                    Timber.e("Failed to get creds", e);
-                }
-
-                return null; // TODO null object pattern? how can i invoke the error path?
-            });
     }
 
     static class OpenHelper extends SQLiteOpenHelper {

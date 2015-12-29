@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,6 +14,9 @@ import android.widget.GridView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.*;
+import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeDto;
+import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
@@ -51,26 +55,28 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     protected void onStart() {
         super.onStart();
 
-        //String buildTypeId = "";
-        List<String> builds = new ArrayList<>();
-
         final int initDelay = 0;
         final int interval = 60;
+
+        Observable<List<BuildTypeWithCredentials>> o1 = BuildMonitorApplication.Db.getAllBuildTypesWithCreds();
         Observable<Long> o2 = Observable.interval(initDelay, interval, TimeUnit.SECONDS);
 
-        ArrayList<ProjectSummary> emptyList = new ArrayList<>(builds.size());
-        for (String build : builds){
-            ProjectSummary summary = new ProjectSummary();
-            summary.status = BuildStatus.Loading;
-            emptyList.add(summary);
-        }
-
-        _sub = o2.flatMap(f -> new ProjectSummaryService().getSummaries(builds))
-                .startWith(emptyList)
+        _sub =  Observable.combineLatest(o1, o2, Pair::create)
+                .map(p -> p.first)
+                .flatMap(builds -> new ProjectSummaryService().getSummaries(builds)) // TODO use combineLatest to display items from db first?
+                .startWith(getEmptyProjectSummaryList())
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"))
                 ;
+    }
+
+    private ArrayList<ProjectSummary> getEmptyProjectSummaryList() {
+        ArrayList<ProjectSummary> emptyList = new ArrayList<>();
+        ProjectSummary summary = new ProjectSummary();
+        summary.status = BuildStatus.Loading;
+        emptyList.add(summary);
+        return emptyList;
     }
 
     private void UpdateUI(List<ProjectSummary> summaries) {
