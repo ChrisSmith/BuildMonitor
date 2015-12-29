@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,13 +13,10 @@ import android.widget.GridView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.*;
-import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeDto;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
+import org.collegelabs.buildmonitor.buildmonitor2.util.CombineLatestAsList;
+import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
+
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -58,17 +54,38 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         final int initDelay = 0;
         final int interval = 60;
 
-        Observable<List<BuildTypeWithCredentials>> o1 = BuildMonitorApplication.Db.getAllBuildTypesWithCreds();
-        Observable<Long> o2 = Observable.interval(initDelay, interval, TimeUnit.SECONDS);
+        Observable<Long> pulse = Observable.interval(initDelay, interval, TimeUnit.SECONDS);
+        Observable<ArrayList<ProjectSummary>> o1 = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
+                .flatMap(builds -> getObs(builds, pulse));
 
-        _sub =  Observable.combineLatest(o1, o2, Pair::create)
-                .map(p -> p.first)
-                .flatMap(builds -> new ProjectSummaryService().getSummaries(builds)) // TODO use combineLatest to display items from db first?
-                .startWith(getEmptyProjectSummaryList())
+        _sub = o1.startWith(getEmptyProjectSummaryList())
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"))
-                ;
+                .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"));
+
+    }
+
+    @NonNull
+    private Observable<ArrayList<ProjectSummary>> getObs(List<BuildTypeWithCredentials> builds, Observable<Long> pulse) {
+
+        List<Observable<ProjectSummary>> sources = new ArrayList<>(builds.size());
+
+        for(BuildTypeWithCredentials buildType : builds){
+            final String displayName = buildType.buildType.displayName;
+
+            ProjectSummaryService service = new ProjectSummaryService();
+
+            ProjectSummary loadingSummary = new ProjectSummary();
+            loadingSummary.status = BuildStatus.Loading;
+            loadingSummary.name = buildType.buildType.displayName;
+
+            sources.add(pulse.flatMap(i -> service.getMostRecentBuild(buildType))
+                        .map(response -> ProjectSummaryService.makeProjectSummary(displayName, response))
+                        .startWith(loadingSummary)
+            );
+        }
+
+        return CombineLatestAsList.create(sources);
     }
 
     private ArrayList<ProjectSummary> getEmptyProjectSummaryList() {
@@ -89,10 +106,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     protected void onStop() {
         super.onStop();
 
-        if(_sub != null && !_sub.isUnsubscribed()){
-            _sub.unsubscribe();
-            _sub = null;
-        }
+        RxUtil.unsubscribe(_sub);
+        _sub = null;
     }
 
     private void showLoadingView(){

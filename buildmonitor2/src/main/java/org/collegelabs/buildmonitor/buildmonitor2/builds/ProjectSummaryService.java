@@ -11,41 +11,32 @@ import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildDetailsResponse
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildType;
 import rx.Observable;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  */
 public class ProjectSummaryService {
 
-    public Observable<List<ProjectSummary>> getSummaries(List<BuildTypeWithCredentials> buildTypes){
+    public List<Observable<ProjectSummary>> getSummaries(List<BuildTypeWithCredentials> buildTypes){
 
         List<Observable<ProjectSummary>> sources = new ArrayList<>(buildTypes.size());
 
         for(BuildTypeWithCredentials buildType : buildTypes){
             final String displayName = buildType.buildType.displayName;
 
-            ProjectSummary summary = new ProjectSummary();
-            summary.status = BuildStatus.Loading;
-            summary.name = displayName;
-
             sources.add(getMostRecentBuild(buildType)
-                    .map(response -> makeProjectSummary(displayName, response))
-                    .startWith(summary));
+                    .delay(new SecureRandom().nextInt(10), TimeUnit.SECONDS)
+                    .map(response -> makeProjectSummary(displayName, response)));
         }
 
-        return Observable.combineLatest(sources, items -> {
-            ArrayList<ProjectSummary> summaries = new ArrayList<>(items.length);
-
-            for(Object obj : items){
-                summaries.add((ProjectSummary) obj);
-            }
-
-            return summaries;
-        });
+        return sources;
     }
 
-    private static ProjectSummary makeProjectSummary(String displayName, BuildDetailsResponse response) {
+    public static ProjectSummary makeProjectSummary(String displayName, BuildDetailsResponse response) {
         ProjectSummary summary = new ProjectSummary();
         summary.name = displayName;
         summary.startDate = response.startDate;

@@ -44,7 +44,7 @@ public class ProjectSummaryAdapter extends ArrayAdapter<ProjectSummary> {
 
         if(item.status == BuildStatus.Failure) {
             holder.status.setTextColor(resources.getColor(R.color.red_stroke));
-        } else if (item.isRunning){
+        } else if (item.isRunning || item.status == BuildStatus.Loading){
             holder.status.setTextColor(resources.getColor(R.color.blue_stroke));
         } else {
             holder.status.setTextColor(resources.getColor(R.color.green_stroke));

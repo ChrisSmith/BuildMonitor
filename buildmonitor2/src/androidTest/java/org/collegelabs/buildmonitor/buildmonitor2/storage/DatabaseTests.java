@@ -1,13 +1,16 @@
 package org.collegelabs.buildmonitor.buildmonitor2.storage;
 
-import android.content.Context;
 import android.test.AndroidTestCase;
-import android.test.RenamingDelegatingContext;
-import junit.framework.Assert;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
-import rx.Observable;
 
+import junit.framework.Assert;
+
+import org.collegelabs.buildmonitor.buildmonitor2.tc.Credentials;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
 
 /**
  */
@@ -28,15 +31,13 @@ public class DatabaseTests extends AndroidTestCase {
     }
 
     public void testNoCredentials() throws Exception {
-        Credentials emptyCreds = new Credentials(-1, null, null, null);
 
-        Credentials creds = _service.GetCredentials()
-                .timeout(10, TimeUnit.MILLISECONDS, Observable.just(emptyCreds))
+        List<Credentials> creds = _service.GetAllCredentials()
+                .timeout(1, TimeUnit.SECONDS)
                 .toBlocking()
-                .single()
-                ;
+                .first();
 
-        Assert.assertEquals(emptyCreds, creds);
+        Assert.assertEquals(0, creds.size());
     }
 
 
@@ -47,11 +48,15 @@ public class DatabaseTests extends AndroidTestCase {
 
         GivenHasSavedCredentials(username, serverUrl, password);
 
-        Credentials creds = _service.GetCredentials()
+        List<Credentials> list = _service.GetAllCredentials()
+                .timeout(1, TimeUnit.SECONDS)
                 .toBlocking()
-                .firstOrDefault(null);
+                .first();
 
-        Assert.assertNotNull(creds);
+        Assert.assertNotNull(list);
+        Assert.assertEquals(1, list.size());
+
+        Credentials creds = list.get(0);
         Assert.assertEquals(username, creds.username);
         Assert.assertEquals(serverUrl, creds.server);
         Assert.assertEquals(password, creds.password);

@@ -109,7 +109,7 @@ public class Database  {
                         Timber.e("Failed to get creds", e);
                     }
 
-                    return null; // TODO null object pattern? how can i invoke the error path?
+                    return new ArrayList<>(); // TODO null object pattern? how can i invoke the error path?
                 });
     }
 
