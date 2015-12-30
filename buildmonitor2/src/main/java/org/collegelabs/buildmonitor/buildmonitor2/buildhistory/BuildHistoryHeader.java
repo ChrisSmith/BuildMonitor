@@ -30,7 +30,7 @@ import butterknife.InjectView;
 public class BuildHistoryHeader {
 
     private final Context _context;
-    @InjectView(R.id.build_history_chart) public BarChart chart2;
+    @InjectView(R.id.build_history_chart) public BarChart chart;
     @InjectView(R.id.build_history_projectname) public TextView projectName;
     @InjectView(R.id.build_history_name) public TextView buildName;
     private final View _view;
@@ -52,21 +52,23 @@ public class BuildHistoryHeader {
     }
 
     private void customizeChart() {
-        chart2.setDrawValueAboveBar(false);
-        chart2.setDrawHighlightArrow(false);
-        chart2.setDescription("");
-        chart2.getAxisRight().setEnabled(false);
-        XAxis xAxis = chart2.getXAxis();
+        chart.setDrawValueAboveBar(false);
+        chart.setDrawHighlightArrow(false);
+        chart.setDescription("");
+        chart.setGridBackgroundColor(_context.getColor(R.color.white));
+        chart.setDoubleTapToZoomEnabled(false);
+        chart.setPinchZoom(false);
+        chart.getAxisRight().setEnabled(false);
+
+        XAxis xAxis = chart.getXAxis();
         xAxis.setGridColor(_context.getColor(R.color.grey));
         xAxis.setGridLineWidth(1.1f);
 
-        YAxis yAxis = chart2.getAxis(YAxis.AxisDependency.LEFT);
+        YAxis yAxis = chart.getAxis(YAxis.AxisDependency.LEFT);
         yAxis.setGridColor(_context.getColor(R.color.grey));
         yAxis.setGridLineWidth(1.1f);
 
-        chart2.setGridBackgroundColor(_context.getColor(R.color.white));
-
-        Legend l = chart2.getLegend();
+        Legend l = chart.getLegend();
         l.setPosition(Legend.LegendPosition.BELOW_CHART_RIGHT);
         l.setFormSize(8f);
         l.setFormToTextSpace(4f);
@@ -119,8 +121,8 @@ public class BuildHistoryHeader {
 
         BarData data = new BarData(xVals, dataSets);
 
-        chart2.setData(data);
-        chart2.invalidate();
+        chart.setData(data);
+        chart.invalidate();
     }
 
     private static class BuildStat {
