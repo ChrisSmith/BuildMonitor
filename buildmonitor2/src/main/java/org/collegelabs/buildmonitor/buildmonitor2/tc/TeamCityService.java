@@ -14,7 +14,7 @@ public interface TeamCityService {
     Observable<ProjectResponse> getProject(@Path("projectId") String projectId);
 
     @GET("/builds")
-    Observable<BuildCollectionResponse> getBuilds(@Query("locator") String locator);
+    Observable<BuildCollectionResponse> getBuilds(@Query("locator") String locator, @Query("fields") String fields);
 
     @GET("/builds/{buildLocator}")
     Observable<BuildDetailsResponse> getBuild(@Path("buildLocator") String locator);
