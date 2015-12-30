@@ -29,6 +29,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.collegelabs.buildmonitor.buildmonitor2.MainActivity" />
         </activity>
+
+        <activity
+            android:name=".buildhistory.BuildHistoryActivity"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.collegelabs.buildmonitor.buildmonitor2.MainActivity" />
+        </activity>
+
     </application>
 
 </manifest>

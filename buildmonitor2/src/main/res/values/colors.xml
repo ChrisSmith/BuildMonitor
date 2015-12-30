@@ -8,7 +8,8 @@
     <color name="blue_fill">#ff4FC3F7</color>
     <color name="yellow_stroke">#FFFFEB3B</color>
     <color name="yellow_fill">#FFFFF176</color>
-
+    <color name="orange_stoke">#FFFF9800</color>
+    <color name="orange_fill">#FFFFB74D</color>
     <color name="grey">#BDBDBD</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

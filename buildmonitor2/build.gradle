@@ -59,6 +59,8 @@ dependencies {
 
     compile 'com.squareup.sqlbrite:sqlbrite:0.5.0'
 
+    compile 'com.diogobernardino:williamchart:2.1'
+
     testCompile 'junit:junit:4.12'
     testCompile('org.robolectric:robolectric:3.0') {
         //exclude group: 'commons-logging', module: 'commons-logging'

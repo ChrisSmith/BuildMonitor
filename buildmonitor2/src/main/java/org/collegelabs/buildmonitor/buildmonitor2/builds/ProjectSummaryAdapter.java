@@ -42,7 +42,11 @@ public class ProjectSummaryAdapter extends ArrayAdapter<ProjectSummary> {
 
         Resources resources = view.getContext().getResources();
 
-        if(item.status == BuildStatus.Failure) {
+        if(item.status == BuildStatus.FailedToLoad){
+            holder.status.setTextColor(resources.getColor(R.color.orange_stoke));
+            holder.status.setText(item.statusText);
+        }
+        else if(item.status == BuildStatus.Failure) {
             holder.status.setTextColor(resources.getColor(R.color.red_stroke));
         } else if (item.isRunning || item.status == BuildStatus.Loading){
             holder.status.setTextColor(resources.getColor(R.color.blue_stroke));

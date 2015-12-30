@@ -21,22 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ProjectSummaryService {
 
-    public List<Observable<ProjectSummary>> getSummaries(List<BuildTypeWithCredentials> buildTypes){
-
-        List<Observable<ProjectSummary>> sources = new ArrayList<>(buildTypes.size());
-
-        for(BuildTypeWithCredentials buildType : buildTypes){
-            final String displayName = buildType.buildType.displayName;
-
-            sources.add(getMostRecentBuild(buildType)
-                    .delay(new SecureRandom().nextInt(10), TimeUnit.SECONDS)
-                    .map(response -> makeProjectSummary(displayName, response)));
-        }
-
-        return sources;
-    }
-
-    public static ProjectSummary makeProjectSummary(String displayName, BuildDetailsResponse response) {
+    public static ProjectSummary makeProjectSummary(int buildId, String displayName, BuildDetailsResponse response) {
         ProjectSummary summary = new ProjectSummary();
         summary.name = displayName;
         summary.startDate = response.startDate;
@@ -45,6 +30,7 @@ public class ProjectSummaryService {
         summary.statusText = response.statusText;
         summary.percentageComplete = response.runningInfo != null ? response.runningInfo.percentageComplete : 100;
         summary.isRunning = response.running;
+        summary.buildId = buildId;
 
 
         return summary;

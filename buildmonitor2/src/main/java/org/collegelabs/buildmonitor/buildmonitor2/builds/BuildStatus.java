@@ -6,4 +6,5 @@ public enum BuildStatus {
     Success,
     Failure,
     Loading,
+    FailedToLoad,
 }

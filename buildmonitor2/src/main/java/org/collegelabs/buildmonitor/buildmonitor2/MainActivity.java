@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+
+import org.collegelabs.buildmonitor.buildmonitor2.buildhistory.BuildHistoryActivity;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.*;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
 import org.collegelabs.buildmonitor.buildmonitor2.util.CombineLatestAsList;
@@ -72,20 +74,34 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
         for(BuildTypeWithCredentials buildType : builds){
             final String displayName = buildType.buildType.displayName;
+            final int buildId = buildType.buildType.id;
 
             ProjectSummaryService service = new ProjectSummaryService();
 
             ProjectSummary loadingSummary = new ProjectSummary();
             loadingSummary.status = BuildStatus.Loading;
-            loadingSummary.name = buildType.buildType.displayName;
+            loadingSummary.name = displayName;
 
-            sources.add(pulse.flatMap(i -> service.getMostRecentBuild(buildType))
-                        .map(response -> ProjectSummaryService.makeProjectSummary(displayName, response))
-                        .startWith(loadingSummary)
+            sources.add(pulse
+                .flatMap(i -> service.getMostRecentBuild(buildType))
+                .map(response -> ProjectSummaryService.makeProjectSummary(buildId, displayName, response))
+                .onErrorReturn(t -> makeErrorViewModel(displayName, t))
+                .startWith(loadingSummary)
             );
         }
 
         return CombineLatestAsList.create(sources);
+    }
+
+    private ProjectSummary makeErrorViewModel(String displayName, Throwable throwable) {
+        ProjectSummary summary = new ProjectSummary();
+        summary.name = displayName;
+        summary.status = BuildStatus.FailedToLoad;
+        summary.statusText = throwable.getMessage();
+
+        Timber.e("Failed to load build", throwable);
+
+        return summary;
     }
 
     private ArrayList<ProjectSummary> getEmptyProjectSummaryList() {
@@ -140,7 +156,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ProjectSummary projectSummary = _adapter.getItem(position);
         try {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(projectSummary.webUrl)));
+//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(projectSummary.webUrl)));
+            startActivity(BuildHistoryActivity.getIntent(this, projectSummary.buildId));
         } catch (Exception e) {
             Timber.e("Failed to open " + projectSummary.webUrl, e);
         }

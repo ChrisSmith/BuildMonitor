@@ -22,9 +22,14 @@ public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
 
     private final LayoutInflater inflater;
 
-    public BuildAdapter(Context context, ArrayList<BuildViewModel> items) {
-        super(context, 0, items);
+    public BuildAdapter(Context context) {
+        super(context, 0);
         inflater = LayoutInflater.from(context);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return super.isEmpty();
     }
 
     @Override

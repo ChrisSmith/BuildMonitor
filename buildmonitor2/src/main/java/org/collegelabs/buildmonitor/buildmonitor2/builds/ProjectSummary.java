@@ -12,4 +12,5 @@ public class ProjectSummary {
     public boolean isRunning;
     public int percentageComplete;
     public String webUrl;
+    public int buildId;
 }
