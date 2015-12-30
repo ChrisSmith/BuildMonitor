@@ -123,6 +123,7 @@ public class BuildHistoryHeader {
 
         chart.setData(data);
         chart.invalidate();
+        chart.setVisibility(View.VISIBLE);
     }
 
     private static class BuildStat {
