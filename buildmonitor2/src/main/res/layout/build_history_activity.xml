@@ -3,8 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    >
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/build_history_projectname"
@@ -21,13 +20,13 @@
         style="?android:textAppearanceLarge"
         />
 
-<com.db.chart.view.BarChartView
-    android:id="@+id/build_history_chart"
-    android:layout_width="match_parent"
-    android:layout_height="250dp"
-    android:layout_marginTop="20dp"
-    >
-</com.db.chart.view.BarChartView>
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/build_history_chart"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_marginTop="20dp"
+        />
+
 
     <ListView
         android:id="@android:id/list"

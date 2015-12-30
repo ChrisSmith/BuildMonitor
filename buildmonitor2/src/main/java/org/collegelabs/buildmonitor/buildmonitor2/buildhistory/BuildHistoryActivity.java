@@ -9,13 +9,13 @@ import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.db.chart.Tools;
-import com.db.chart.model.Bar;
-import com.db.chart.model.BarSet;
-import com.db.chart.view.AxisController;
-import com.db.chart.view.BarChartView;
-import com.db.chart.view.XController;
-import com.db.chart.view.YController;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 
 import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
@@ -29,7 +29,10 @@ import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +47,7 @@ import timber.log.Timber;
 
 public class BuildHistoryActivity extends Activity {
 
-    @InjectView(R.id.build_history_chart) public BarChartView chart;
+    @InjectView(R.id.build_history_chart) public BarChart chart2;
     @InjectView(R.id.build_history_projectname) public TextView projectName;
     @InjectView(R.id.build_history_name) public TextView buildName;
     @InjectView(android.R.id.list) public ListView listView;
@@ -64,6 +67,26 @@ public class BuildHistoryActivity extends Activity {
         _adapter = new BuildAdapter(this);
         listView.setAdapter(_adapter);
 
+        chart2.setDrawValueAboveBar(false);
+        chart2.setDrawHighlightArrow(false);
+        chart2.setDescription("");
+        chart2.getAxisRight().setEnabled(false);
+        XAxis xAxis = chart2.getXAxis();
+        xAxis.setGridColor(getColor(R.color.grey));
+        xAxis.setGridLineWidth(1.1f);
+
+        YAxis yAxis = chart2.getAxis(YAxis.AxisDependency.LEFT);
+        yAxis.setGridColor(getColor(R.color.grey));
+        yAxis.setGridLineWidth(1.1f);
+
+        chart2.setGridBackgroundColor(getColor(R.color.white));
+
+        Legend l = chart2.getLegend();
+        l.setPosition(Legend.LegendPosition.BELOW_CHART_RIGHT);
+        l.setFormSize(8f);
+        l.setFormToTextSpace(4f);
+        l.setXEntrySpace(6f);
+
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(b -> Observable.from(b))
                 .filter(f -> f.buildType.id == buildId)
@@ -80,7 +103,11 @@ public class BuildHistoryActivity extends Activity {
         getActionBar().setTitle(build.buildType.displayName);
         unsubscribe();
 
-        _subscription = new ProjectSummaryService().getBuilds(build, 100, 0)
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.add(Calendar.WEEK_OF_YEAR, -2);
+
+        // get the most recent 1K builds in the last 2 weeks
+        _subscription = new ProjectSummaryService().getBuilds(build, 1000, 0, cal.getTime())
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"));
@@ -122,45 +149,37 @@ public class BuildHistoryActivity extends Activity {
 
             groups.put(key, value);
         }
-
-        BarSet passedBarset = new BarSet();
-        BarSet failedBarset = new BarSet();
-
         ArrayList<Map.Entry<String, BuildStat>> entries = new ArrayList<>(groups.entrySet());
         Collections.sort(entries, (lhs, rhs) -> lhs.getKey().compareTo(rhs.getKey()));
 
+        ArrayList<String> xVals = new ArrayList<>();
+        ArrayList<BarEntry> yVals1 = new ArrayList<>();
+        int i = 0;
+
         for (Map.Entry<String, BuildStat> item : entries){
-            passedBarset.addBar(new Bar(item.getKey(), item.getValue().Passed));
-            failedBarset.addBar(new Bar(item.getKey(), item.getValue().Failed));
+            BuildStat stat = item.getValue();
+
+            yVals1.add(new BarEntry(new float[]{ stat.Passed, stat.Failed }, i++));
+            xVals.add(item.getKey());
         }
 
-        passedBarset.setColor(getResources().getColor(R.color.green_fill, getTheme()));
-        failedBarset.setColor(getResources().getColor(R.color.red_fill, getTheme()));
-        chart.addData(failedBarset);
-        chart.addData(passedBarset);
+        BarDataSet set1 = new BarDataSet(yVals1, "");
+        set1.setColors(new int[]{
+                getColor(R.color.green_fill),
+                getColor(R.color.red_fill),
+        });
+        set1.setStackLabels(new String[] { "Passes", "Failures" });
+        set1.setHighlightEnabled(false);
+        set1.setDrawValues(false);
+        set1.setBarSpacePercent(20);
 
-        chart.setSetSpacing(Tools.fromDpToPx(-15));
-        chart.setBarSpacing(Tools.fromDpToPx(35));
-        chart.setRoundCorners(Tools.fromDpToPx(2));
+        ArrayList<BarDataSet> dataSets = new ArrayList<>();
+        dataSets.add(set1);
 
+        BarData data = new BarData(xVals, dataSets);
 
-        Paint gridPaint = new Paint();
-        gridPaint.setColor(Color.parseColor("#8986705C"));
-        gridPaint.setStyle(Paint.Style.STROKE);
-        gridPaint.setAntiAlias(true);
-        gridPaint.setStrokeWidth(Tools.fromDpToPx(.75f));
-
-        chart.setBorderSpacing(5)
-                .setAxisBorderValues(0, 10, 2)
-                .setGrid(BarChartView.GridType.FULL, 10, entries.size(), gridPaint)
-                .setXLabels(XController.LabelPosition.OUTSIDE)
-                .setYLabels(YController.LabelPosition.OUTSIDE)
-                .setLabelsColor(Color.parseColor("#86705c"))
-                .setAxisColor(Color.parseColor("#86705c"));
-
-
-        chart.show();
-
+        chart2.setData(data);
+        chart2.invalidate();
     }
 
     private void unsubscribe() {
