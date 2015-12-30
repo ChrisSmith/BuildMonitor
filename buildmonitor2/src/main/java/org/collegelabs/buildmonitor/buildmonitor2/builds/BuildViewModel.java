@@ -36,7 +36,7 @@ public class BuildViewModel {
         percentageComplete = build.percentageComplete + "%";
         isEmpty = false;
         buildStatus = build.status.equalsIgnoreCase("SUCCESS") ? BuildStatus.Success : BuildStatus.Failure;
-        status = getStatusString(buildStatus, isRunning);
+        status = build.status;
         webUrl = build.webUrl;
     }
 
@@ -46,16 +46,5 @@ public class BuildViewModel {
             humanTime += " " + build.percentageComplete + "%";
         }
         return humanTime;
-    }
-
-    private static String getStatusString(BuildStatus status, boolean isRunning) {
-        switch (status){
-            case Failure:
-                return "NOPE.";
-            case Success:
-                return isRunning ? "HASN'T FAILED YET." : "SUCCESS!";
-            default:
-                throw new RuntimeException("invalid status: " + status);
-        }
     }
 }

@@ -3,37 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
-
-    <TextView
-        android:id="@+id/build_history_projectname"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Project Name"
-        style="?android:textAppearanceSmall"
-        />
-    <TextView
-        android:id="@+id/build_history_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Unit Tests"
-        style="?android:textAppearanceLarge"
-        />
-
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/build_history_chart"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_marginTop="20dp"
-        />
-
+    >
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-
+        android:layout_height="match_parent"
         />
 
 </LinearLayout>

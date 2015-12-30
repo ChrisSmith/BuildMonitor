@@ -29,34 +29,12 @@ public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
 
     @Override
     public boolean isEmpty() {
-        return super.isEmpty();
-    }
-
-    @Override
-    public int getCount() {
-        return super.getCount();
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        return position == 0 ? 0 : 1;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 2;
+        return false;
     }
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         BuildViewModel item = this.getItem(position);
-
-        if(position == 0){
-            // first item is the header
-            view = view != null ? view : inflater.inflate(R.layout.main_listheader, parent, false);
-            new HeaderViewHolder(view).Update(item);
-            return view;
-        }
 
         ViewHolder holder;
         if (view != null) {
@@ -72,8 +50,10 @@ public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
 
         Resources resources = view.getContext().getResources();
 
-        if(item.status.equals("NOPE.")) {
+        if(item.buildStatus == BuildStatus.Failure) {
             holder.status.setTextColor(resources.getColor(R.color.red_stroke));
+        } else if(item.isRunning){
+            holder.status.setTextColor(resources.getColor(R.color.blue_stroke));
         } else {
             holder.status.setTextColor(resources.getColor(R.color.green_stroke));
         }
@@ -87,25 +67,6 @@ public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
 
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
-        }
-    }
-
-    static class HeaderViewHolder {
-        @InjectView(R.id.main_textview_status) TextView _status;
-        @InjectView(R.id.main_textview_summary) TextView _summary;
-
-        public HeaderViewHolder(View view) {
-            ButterKnife.inject(this, view);
-        }
-
-        public void Update(BuildViewModel viewModel){
-            if(viewModel.isEmpty){
-                _summary.setText("");
-                _status.setText("Loading...");
-            } else{
-                _status.setText(viewModel.status);
-                _summary.setText(viewModel.summary);
-            }
         }
     }
 }

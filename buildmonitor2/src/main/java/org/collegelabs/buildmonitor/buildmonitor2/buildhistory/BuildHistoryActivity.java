@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,13 +48,11 @@ import timber.log.Timber;
 
 public class BuildHistoryActivity extends Activity {
 
-    @InjectView(R.id.build_history_chart) public BarChart chart2;
-    @InjectView(R.id.build_history_projectname) public TextView projectName;
-    @InjectView(R.id.build_history_name) public TextView buildName;
     @InjectView(android.R.id.list) public ListView listView;
 
     private Subscription _subscription;
     private BuildAdapter _adapter;
+    private BuildHistoryHeader _header;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,25 +66,8 @@ public class BuildHistoryActivity extends Activity {
         _adapter = new BuildAdapter(this);
         listView.setAdapter(_adapter);
 
-        chart2.setDrawValueAboveBar(false);
-        chart2.setDrawHighlightArrow(false);
-        chart2.setDescription("");
-        chart2.getAxisRight().setEnabled(false);
-        XAxis xAxis = chart2.getXAxis();
-        xAxis.setGridColor(getColor(R.color.grey));
-        xAxis.setGridLineWidth(1.1f);
-
-        YAxis yAxis = chart2.getAxis(YAxis.AxisDependency.LEFT);
-        yAxis.setGridColor(getColor(R.color.grey));
-        yAxis.setGridLineWidth(1.1f);
-
-        chart2.setGridBackgroundColor(getColor(R.color.white));
-
-        Legend l = chart2.getLegend();
-        l.setPosition(Legend.LegendPosition.BELOW_CHART_RIGHT);
-        l.setFormSize(8f);
-        l.setFormToTextSpace(4f);
-        l.setXEntrySpace(6f);
+        _header = new BuildHistoryHeader(this);
+        listView.addHeaderView(_header.getView());
 
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(b -> Observable.from(b))
@@ -97,16 +79,16 @@ public class BuildHistoryActivity extends Activity {
 
     }
 
+
     private void onGotBuild(final BuildTypeWithCredentials build) {
-        buildName.setText(build.buildType.name);
-        projectName.setText(build.buildType.projectName);
+        _header.updateTitles(build.buildType.projectName, build.buildType.name);
         getActionBar().setTitle(build.buildType.displayName);
         unsubscribe();
 
         GregorianCalendar cal = new GregorianCalendar();
-        cal.add(Calendar.WEEK_OF_YEAR, -2);
+        cal.add(Calendar.MONTH, -2);
 
-        // get the most recent 1K builds in the last 2 weeks
+        // get the most recent 1K builds in the last 2 months
         _subscription = new ProjectSummaryService().getBuilds(build, 1000, 0, cal.getTime())
             .subscribeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
@@ -119,11 +101,6 @@ public class BuildHistoryActivity extends Activity {
         super.onDestroy();
     }
 
-    public static class BuildStat {
-        public int Passed;
-        public int Failed;
-    }
-
     private void UpdateUI(BuildCollectionResponse response) {
 
         _adapter.clear();
@@ -132,54 +109,7 @@ public class BuildHistoryActivity extends Activity {
             models.add(new BuildViewModel(b));
         }
         _adapter.addAll(models);
-
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        HashMap<String, BuildStat> groups = new HashMap<>();
-
-        for (Build b : response.builds){
-            String key = df.format(b.startDate);
-            BuildStat value = groups.get(key);
-            value = value != null ? value : new BuildStat();
-
-            if(b.status.equalsIgnoreCase("SUCCESS")){
-                value.Passed++;
-            }else{
-                value.Failed++;
-            }
-
-            groups.put(key, value);
-        }
-        ArrayList<Map.Entry<String, BuildStat>> entries = new ArrayList<>(groups.entrySet());
-        Collections.sort(entries, (lhs, rhs) -> lhs.getKey().compareTo(rhs.getKey()));
-
-        ArrayList<String> xVals = new ArrayList<>();
-        ArrayList<BarEntry> yVals1 = new ArrayList<>();
-        int i = 0;
-
-        for (Map.Entry<String, BuildStat> item : entries){
-            BuildStat stat = item.getValue();
-
-            yVals1.add(new BarEntry(new float[]{ stat.Passed, stat.Failed }, i++));
-            xVals.add(item.getKey());
-        }
-
-        BarDataSet set1 = new BarDataSet(yVals1, "");
-        set1.setColors(new int[]{
-                getColor(R.color.green_fill),
-                getColor(R.color.red_fill),
-        });
-        set1.setStackLabels(new String[] { "Passes", "Failures" });
-        set1.setHighlightEnabled(false);
-        set1.setDrawValues(false);
-        set1.setBarSpacePercent(20);
-
-        ArrayList<BarDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set1);
-
-        BarData data = new BarData(xVals, dataSets);
-
-        chart2.setData(data);
-        chart2.invalidate();
+        _header.updateChart(response.builds);
     }
 
     private void unsubscribe() {
