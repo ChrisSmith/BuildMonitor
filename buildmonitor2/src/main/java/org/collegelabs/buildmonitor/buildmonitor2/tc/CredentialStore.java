@@ -92,7 +92,7 @@ public class CredentialStore {
             throw new CredentialException("Failed to retrieve key", e);
 
         } catch (UnrecoverableEntryException e) {
-            Timber.e("Unrecoverable key. Generating new one", e);
+            Timber.e(e, "Unrecoverable key. Generating new one");
             generateKeypair();
 
             try {

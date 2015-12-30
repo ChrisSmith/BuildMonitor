@@ -159,7 +159,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 //            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(projectSummary.webUrl)));
             startActivity(BuildHistoryActivity.getIntent(this, projectSummary.buildId));
         } catch (Exception e) {
-            Timber.e("Failed to open " + projectSummary.webUrl, e);
+            Timber.e(e, "Failed to open " + projectSummary.webUrl);
         }
     }
 }

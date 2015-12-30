@@ -203,7 +203,7 @@ public class EditBuildActivity extends Activity {
             finish();
         }catch (Exception e){
             ToastUtil.show(this, "Failed to save changes");
-            Timber.e("Failed to insert buildType", e);
+            Timber.e(e, "Failed to insert buildType");
         }
     }
 

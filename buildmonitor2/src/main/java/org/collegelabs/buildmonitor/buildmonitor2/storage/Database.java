@@ -106,7 +106,7 @@ public class Database  {
 
                         return result;
                     } catch (CredentialException e) {
-                        Timber.e("Failed to get creds", e);
+                        Timber.e(e, "Failed to get creds");
                     }
 
                     return new ArrayList<>(); // TODO null object pattern? how can i invoke the error path?
