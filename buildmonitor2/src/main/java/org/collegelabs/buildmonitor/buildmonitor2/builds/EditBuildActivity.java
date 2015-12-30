@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.*;
 import android.widget.*;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.jakewharton.rxbinding.widget.RxAdapterView;
+import com.jakewharton.rxbinding.widget.RxSearchView;
+
 import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeDto;
@@ -20,7 +23,7 @@ import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildType;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.util.ToastUtil;
-import rx.Observable;
+
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -28,6 +31,7 @@ import timber.log.Timber;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class EditBuildActivity extends Activity {
 
@@ -41,6 +45,7 @@ public class EditBuildActivity extends Activity {
     private BuildTypeAdapter _buildTypeAdapter;
     private List<Subscription> _subscriptions = new ArrayList<>();
     private Subscription _buildTypesSub;
+    private List<BuildType> _buildTypes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,14 +115,53 @@ public class EditBuildActivity extends Activity {
     }
 
     private void UpdateUI(BuildTypeCollectionResponse buildTypeCollectionResponse) {
-        _buildTypeAdapter.clear();
-        _buildTypeAdapter.addAll(buildTypeCollectionResponse.buildTypes);
+        setVisibleBuilds(buildTypeCollectionResponse.buildTypes);
+        _buildTypes = new ArrayList<>(buildTypeCollectionResponse.buildTypes);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.edit_build_menu, menu);
+        SearchView searchItem = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        setupSearchListener(searchItem);
+
         return true;
+    }
+
+    private void setupSearchListener(SearchView searchItem) {
+
+        _subscriptions.add(
+                RxSearchView.queryTextChanges(searchItem)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .debounce(50, TimeUnit.MILLISECONDS)
+                .map(query -> Pair.create(query.toString(), new ArrayList<>(_buildTypes)))
+                .map(pair -> {
+
+                    if(pair.first.length() == 0){
+                        return pair.second;
+                    }
+
+                    String query = pair.first.toLowerCase();
+                    List<BuildType> items = new ArrayList<>();
+                    for(BuildType b : pair.second){
+                        if(b.name.toLowerCase().contains(query)
+                            || b.projectName.toLowerCase().contains(query)){
+                            items.add(b);
+                        }
+                    }
+                    return items;
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::setVisibleBuilds,
+                e -> {
+                    Timber.e(e, "Search failed");
+                }));
+    }
+
+    private void setVisibleBuilds(List<BuildType> builds) {
+        _listView.clearChoices();
+        _buildTypeAdapter.clear();
+        _buildTypeAdapter.addAll(builds);
     }
 
     @Override

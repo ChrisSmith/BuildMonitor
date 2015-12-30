@@ -4,7 +4,13 @@
 
     <item android:id="@+id/action_save_build"
           android:title="Save"
-          android:icon="@drawable/ic_done_24dp"
           android:showAsAction="always"/>
+
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        android:showAsAction="collapseActionView|always"
+        android:icon="@drawable/ic_search_black_24dp"
+        android:actionViewClass="android.widget.SearchView"
+        />
 
 </menu>
