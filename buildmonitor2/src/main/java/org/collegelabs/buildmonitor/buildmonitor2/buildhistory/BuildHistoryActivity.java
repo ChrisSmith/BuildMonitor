@@ -7,6 +7,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -26,6 +29,7 @@ import org.collegelabs.buildmonitor.buildmonitor2.builds.ProjectSummaryService;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
+import org.collegelabs.buildmonitor.buildmonitor2.util.ActivityUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 
 import java.text.SimpleDateFormat;
@@ -69,6 +73,8 @@ public class BuildHistoryActivity extends Activity {
         _header = new BuildHistoryHeader(this);
         listView.addHeaderView(_header.getView());
 
+        listView.setOnItemClickListener(this::onItemClick);
+
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(b -> Observable.from(b))
                 .filter(f -> f.buildType.id == buildId)
@@ -77,6 +83,17 @@ public class BuildHistoryActivity extends Activity {
                 .first()
                 .subscribe(this::onGotBuild, e -> Timber.e(e, "Failure getting project"));
 
+    }
+
+    private void onItemClick(AdapterView adapterView, View view, int position, long id) {
+        if(position == AbsListView.INVALID_POSITION){
+            return;
+        }
+
+        ActivityUtil.openUrl(this, () -> {
+            BuildViewModel item = (BuildViewModel) adapterView.getItemAtPosition(position);
+            return item == null ? null : item.webUrl;
+        });
     }
 
 
