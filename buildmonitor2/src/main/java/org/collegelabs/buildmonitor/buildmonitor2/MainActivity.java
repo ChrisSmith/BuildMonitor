@@ -1,23 +1,23 @@
 package org.collegelabs.buildmonitor.buildmonitor2;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.GridLayoutManager;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.GridView;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 import org.collegelabs.buildmonitor.buildmonitor2.buildhistory.BuildHistoryActivity;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.*;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.OnItemCheckedStateChangedListener;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.OnItemClickListener;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.SelectableRecyclerView;
 import org.collegelabs.buildmonitor.buildmonitor2.util.CombineLatestAsList;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 
@@ -32,12 +32,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-public class MainActivity extends Activity implements AdapterView.OnItemClickListener, ActionMode.Callback, AbsListView.MultiChoiceModeListener {
-    @InjectView(android.R.id.list) GridView _gridView;
+public class MainActivity extends Activity implements OnItemClickListener, ActionMode.Callback, OnItemCheckedStateChangedListener {
+    @InjectView(android.R.id.list)
+    SelectableRecyclerView _gridView;
 
     private Subscription _sub;
     private ProjectSummaryAdapter _adapter;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +45,12 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         setContentView(R.layout.main_activity);
         ButterKnife.inject(this);
 
-        _adapter = new ProjectSummaryAdapter(this);
+        _adapter = new ProjectSummaryAdapter(this, _gridView, _gridView);
         _gridView.setAdapter(_adapter);
+        _gridView.setLayoutManager(new GridLayoutManager(this, 2));
+        _gridView.setActionModeCallback(this);
         _gridView.setOnItemClickListener(this);
-        _gridView.setMultiChoiceModeListener(this);
-        _gridView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
+        _gridView.setOnItemCheckedStateChangedListener(this);
 
         showLoadingView(); //set view model of some sort?
     }
@@ -119,8 +120,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     private void UpdateUI(List<ProjectSummary> summaries) {
         // TODO handle 0 builds
-        _adapter.clear();
-        _adapter.addAll(summaries);
+        _adapter.reset(summaries);
     }
 
     @Override
@@ -158,7 +158,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onClick(View v, int position) {
         ProjectSummary projectSummary = _adapter.getItem(position);
         try {
 //            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(projectSummary.webUrl)));
@@ -184,8 +184,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
         if(item.getItemId() == R.id.action_delete_builds){
 
-            long[] checkedItemIds = _gridView.getCheckedItemIds();
-            for(long id : checkedItemIds){
+            int[] checkedItemIds = _adapter.getSelectedItemIds();
+            for(int id : checkedItemIds){
                 Timber.d("Deleting %d", id);
                 BuildMonitorApplication.Db.deleteBuildType(id);
             }
@@ -201,9 +201,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public void onDestroyActionMode(ActionMode mode) { }
 
     @Override
-    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-
-        int count = _gridView.getCheckedItemCount();
+    public void onItemCheckedStateChanged(ActionMode mode, int position, boolean checked) {
+        int count = _adapter.getSelectedItemCount();
         String title = count == 1 ? " build selected" : " builds selected";
         mode.setTitle(count + title);
     }

@@ -1,80 +1,124 @@
 package org.collegelabs.buildmonitor.buildmonitor2.builds;
 
 import android.content.Context;
-import android.content.res.Resources;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckedTextView;
+import android.widget.Checkable;
+import android.widget.ImageView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.OnItemClickListener;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.OnItemLongClickListener;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.SelectableRecyclerAdapter;
 import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
 
-public class ProjectSummaryAdapter extends ArrayAdapter<ProjectSummary> {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final LayoutInflater inflater;
+public class ProjectSummaryAdapter extends SelectableRecyclerAdapter<ProjectSummaryAdapter.ViewHolder> {
 
-    public ProjectSummaryAdapter(Context context) {
-        super(context, R.layout.project_summary_rowitem);
-        inflater = LayoutInflater.from(context);
+    private final LayoutInflater _inflater;
+    private final OnItemClickListener _clickListener;
+    private final OnItemLongClickListener _longClickListener;
+    private List<ProjectSummary> _items = new ArrayList<>();
+
+    public ProjectSummaryAdapter(
+            Context context,
+            OnItemClickListener clickListener,
+            OnItemLongClickListener longClickListener
+    ) {
+        _clickListener = clickListener;
+        _longClickListener = longClickListener;
+        _inflater = LayoutInflater.from(context);
+        setHasStableIds(true);
     }
 
     @Override
-    public boolean hasStableIds() {
-        return true;
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = _inflater.inflate(R.layout.project_summary_rowitem, parent, false);
+        return new ViewHolder(view, _clickListener, _longClickListener);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        ProjectSummary item =  _items.get(position);
+
+        holder.bind(item, isSelectable());
+        ((Checkable)holder.itemView).setChecked(isSelected(position));
     }
 
     @Override
     public long getItemId(int position) {
-        ProjectSummary item = getItem(position);
-        return item == null ? AbsListView.INVALID_POSITION : item.buildId;
+        ProjectSummary item = _items.get(position);
+        return item == null ? RecyclerView.NO_ID: item.buildId;
     }
 
     @Override
-    public View getView(int position, View view, ViewGroup parent) {
-        ProjectSummary item = this.getItem(position);
-
-        ViewHolder holder;
-        if (view != null) {
-            holder = (ViewHolder) view.getTag();
-        } else {
-            view = inflater.inflate(R.layout.project_summary_rowitem, parent, false);
-            holder = new ViewHolder(view);
-            view.setTag(holder);
-        }
-
-        holder.name.setText(item.name);
-        holder.status.setText(item.isRunning ? "[Running] " + item.status + " " + item.percentageComplete +"%" : item.status.toString());
-        holder.startTime.setText(TimeUtil.human(item.startDate));
-
-        Resources resources = view.getContext().getResources();
-
-        if(item.status == BuildStatus.FailedToLoad){
-            holder.status.setTextColor(resources.getColor(R.color.orange_stoke));
-            holder.status.setText(item.statusText);
-        }
-        else if(item.status == BuildStatus.Failure) {
-            holder.status.setTextColor(resources.getColor(R.color.red_stroke));
-        } else if (item.isRunning || item.status == BuildStatus.Loading){
-            holder.status.setTextColor(resources.getColor(R.color.blue_stroke));
-        } else {
-            holder.status.setTextColor(resources.getColor(R.color.green_stroke));
-        }
-
-        return view;
+    public int getItemCount() {
+        return _items.size();
     }
 
-    static class ViewHolder {
+    public void clear() {
+        _items.clear();
+        notifyDataSetChanged();
+    }
+
+    public void reset(List<ProjectSummary> items) {
+        // TODO implement merge
+        _items = items;
+        notifyDataSetChanged();
+    }
+
+    public int[] getSelectedItemIds(){
+        int[] positions = getSelectedPositions();
+        int[] items = new int[positions.length];
+
+        for(int i = 0; i < items.length; i++){
+            items[i] = getItem(positions[i]).buildId;
+        }
+
+        return items;
+    }
+
+    public ProjectSummary getItem(int position) {
+        return _items.get(position);
+    }
+
+    static class ViewHolder extends SelectableViewHolder {
         @InjectView(R.id.project_summary_name) public TextView name;
         @InjectView(R.id.project_summary_status) public TextView status;
         @InjectView(R.id.project_summary_starttime) public TextView startTime;
+        @InjectView(R.id.project_summary_checkmark) public ImageView checkmark;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, OnItemClickListener clickListener, OnItemLongClickListener longClickListener) {
+            super(view, clickListener, longClickListener);
             ButterKnife.inject(this, view);
+        }
+
+        public void bind(ProjectSummary item, boolean selectable){
+            Context context = this.itemView.getContext();
+
+            checkmark.setVisibility(selectable ? View.VISIBLE : View.GONE);
+
+            name.setText(item.name);
+            status.setText(item.isRunning ? "[Running] " + item.status + " " + item.percentageComplete +"%" : item.status.toString());
+            startTime.setText(TimeUtil.human(item.startDate));
+
+            if(item.status == BuildStatus.FailedToLoad){
+                status.setTextColor(context.getColor(R.color.orange_stoke));
+                status.setText(item.statusText);
+            }
+            else if(item.status == BuildStatus.Failure) {
+                status.setTextColor(context.getColor(R.color.red_stroke));
+            } else if (item.isRunning || item.status == BuildStatus.Loading){
+                status.setTextColor(context.getColor(R.color.blue_stroke));
+            } else {
+                status.setTextColor(context.getColor(R.color.green_stroke));
+            }
         }
     }
 }

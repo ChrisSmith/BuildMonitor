@@ -5,15 +5,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
-                android:background="@drawable/list_selector"
+                android:background="?android:attr/selectableItemBackground"
                 >
+    <ImageView
+        android:id="@+id/project_summary_checkmark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="?android:attr/listChoiceIndicatorMultiple"
+        android:duplicateParentState="true"
+        android:visibility="visible"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        />
 
     <TextView android:id="@+id/project_summary_name"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
+             android:layout_toStartOf="@id/project_summary_checkmark"
              android:text="Unit Tests"
              style="@android:style/TextAppearance.Medium"
              android:layout_alignParentTop="true"
+             android:layout_alignParentStart="true"
         />
 
     <TextView android:id="@+id/project_summary_status"
@@ -35,4 +47,6 @@
             android:layout_alignBaseline="@+id/project_summary_status"
             style="@android:style/TextAppearance.Small"
             />
+
+
 </org.collegelabs.buildmonitor.buildmonitor2.ui.CheckableRelativeLayout>
