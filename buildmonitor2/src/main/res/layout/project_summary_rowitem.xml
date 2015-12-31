@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.collegelabs.buildmonitor.buildmonitor2.ui.CheckableRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
+                android:background="@drawable/list_selector"
                 >
 
     <TextView android:id="@+id/project_summary_name"
-             android:layout_width="match_parent"
+             android:layout_width="wrap_content"
              android:layout_height="wrap_content"
              android:text="Unit Tests"
              style="@android:style/TextAppearance.Medium"
+             android:layout_alignParentTop="true"
         />
 
     <TextView android:id="@+id/project_summary_status"
@@ -19,6 +21,7 @@
               android:layout_height="wrap_content"
               android:text="Passing"
               android:layout_below="@+id/project_summary_name"
+              android:layout_alignStart="@+id/project_summary_name"
               style="@android:style/TextAppearance.Medium"
               android:textColor="@color/green_fill"
             />
@@ -32,4 +35,4 @@
             android:layout_alignBaseline="@+id/project_summary_status"
             style="@android:style/TextAppearance.Small"
             />
-</RelativeLayout>
+</org.collegelabs.buildmonitor.buildmonitor2.ui.CheckableRelativeLayout>

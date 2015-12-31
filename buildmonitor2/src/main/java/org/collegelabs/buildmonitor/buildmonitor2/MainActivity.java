@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import butterknife.ButterKnife;
@@ -29,7 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends Activity implements AdapterView.OnItemClickListener {
+
+public class MainActivity extends Activity implements AdapterView.OnItemClickListener, ActionMode.Callback, AbsListView.MultiChoiceModeListener {
     @InjectView(android.R.id.list) GridView _gridView;
 
     private Subscription _sub;
@@ -45,6 +48,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         _adapter = new ProjectSummaryAdapter(this);
         _gridView.setAdapter(_adapter);
         _gridView.setOnItemClickListener(this);
+        _gridView.setMultiChoiceModeListener(this);
+        _gridView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
 
         showLoadingView(); //set view model of some sort?
     }
@@ -161,5 +166,42 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         } catch (Exception e) {
             Timber.e(e, "Failed to open " + projectSummary.webUrl);
         }
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        mode.getMenuInflater().inflate(R.menu.main_contextual, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
+        if(item.getItemId() == R.id.action_delete_builds){
+
+            long[] checkedItemIds = _gridView.getCheckedItemIds();
+            for(long id : checkedItemIds){
+                Timber.d("Deleting %d", id);
+                BuildMonitorApplication.Db.deleteBuildType(id);
+            }
+
+            mode.finish();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void onDestroyActionMode(ActionMode mode) { }
+
+    @Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+
     }
 }

@@ -1,25 +1,28 @@
-package org.collegelabs.buildmonitor.buildmonitor2.builds;
+package org.collegelabs.buildmonitor.buildmonitor2.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.Checkable;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
-public class CheckableLinearLayout extends LinearLayout implements Checkable {
+public class CheckableRelativeLayout extends RelativeLayout implements Checkable {
 
     private static final int[] CHECKED_STATE_SET = { android.R.attr.state_checked };
 
-    public CheckableLinearLayout(Context context) {
-        super(context, null);
+    public CheckableRelativeLayout(Context context) {
+        super(context);
     }
 
-    public CheckableLinearLayout(Context context, AttributeSet attrs) {
-        super(context, attrs, 0);
+    public CheckableRelativeLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
 
-    public CheckableLinearLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+    public CheckableRelativeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    public CheckableRelativeLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     private boolean checked;
@@ -34,13 +37,6 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
         if (this.checked != checked) {
             this.checked = checked;
             refreshDrawableState();
-
-            for (int i = 0; i < getChildCount(); i++) {
-                View child = getChildAt(i);
-                if (child instanceof Checkable) {
-                    ((Checkable) child).setChecked(checked);
-                }
-            }
         }
     }
 

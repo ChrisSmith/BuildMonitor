@@ -12,4 +12,6 @@
     <color name="orange_fill">#FFFFB74D</color>
     <color name="grey">#BDBDBD</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="checked">#CC80CBC4</color>
 </resources>

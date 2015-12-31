@@ -113,6 +113,10 @@ public class Database  {
                 });
     }
 
+    public void deleteBuildType(long id) {
+        Db.delete(BuildTypeDto.TABLE, " where buildTypeId = ?", ""+id);
+    }
+
     static class OpenHelper extends SQLiteOpenHelper {
 
         public static final String DATABASE_NAME = "buildMonitorDb";

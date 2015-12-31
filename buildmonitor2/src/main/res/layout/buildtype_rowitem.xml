@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.collegelabs.buildmonitor.buildmonitor2.builds.CheckableLinearLayout
+<org.collegelabs.buildmonitor.buildmonitor2.ui.CheckableLinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -34,4 +34,4 @@
             />
 
 
-</org.collegelabs.buildmonitor.buildmonitor2.builds.CheckableLinearLayout>
+</org.collegelabs.buildmonitor.buildmonitor2.ui.CheckableLinearLayout>

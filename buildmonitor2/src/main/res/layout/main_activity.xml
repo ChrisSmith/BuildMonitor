@@ -5,11 +5,18 @@
                 tools:context=".MainActivity">
 
    <GridView
-           android:id="@android:id/list"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           tools:listitem="@layout/project_summary_rowitem"
-           android:columnWidth="200dp"
-           android:numColumns="auto_fit"
+
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/project_summary_rowitem"
+            android:columnWidth="200dp"
+            android:numColumns="auto_fit"
            />
+    <!--
+
+    android:drawSelectorOnTop="true"
+    android:foreground="?android:attr/selectableItemBackground"
+
+            -->
 </RelativeLayout>

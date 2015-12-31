@@ -5,15 +5,15 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckedTextView;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
 import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
 
-/**
- */
 public class ProjectSummaryAdapter extends ArrayAdapter<ProjectSummary> {
 
     private final LayoutInflater inflater;
@@ -21,6 +21,17 @@ public class ProjectSummaryAdapter extends ArrayAdapter<ProjectSummary> {
     public ProjectSummaryAdapter(Context context) {
         super(context, R.layout.project_summary_rowitem);
         inflater = LayoutInflater.from(context);
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        ProjectSummary item = getItem(position);
+        return item == null ? AbsListView.INVALID_POSITION : item.buildId;
     }
 
     @Override
