@@ -30,6 +30,7 @@
             android:checkMark="?android:attr/listChoiceIndicatorSingle"
             android:paddingStart="?android:attr/listPreferredItemPaddingStart"
             android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+            android:duplicateParentState="true"
             android:text="Unit Tests"
             />
 
