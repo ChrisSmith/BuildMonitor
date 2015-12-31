@@ -203,5 +203,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
 
+        int count = _gridView.getCheckedItemCount();
+        String title = count == 1 ? " build selected" : " builds selected";
+        mode.setTitle(count + title);
     }
 }
