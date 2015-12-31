@@ -150,8 +150,14 @@ public class MainActivity extends Activity implements OnItemClickListener, Actio
             return true;
         }
 
+        if(id == R.id.action_edit_builds){
+            _gridView.startEditMode();
+            return true;
+        }
+
         if(id == R.id.action_add_build){
             startActivity(EditBuildActivity.getIntent(this));
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

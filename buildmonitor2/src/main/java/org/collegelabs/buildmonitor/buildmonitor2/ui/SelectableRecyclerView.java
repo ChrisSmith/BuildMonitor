@@ -68,15 +68,19 @@ public class SelectableRecyclerView extends RecyclerView
 
     @Override
     public boolean onLongClick(View v, int position) {
+        startEditMode();
+        toggleSelection(position);
+
+        return true;
+    }
+
+    public void startEditMode() {
         if(_actionMode == null){
             _actionMode = startActionMode(_actionModeCallback);
 
             SelectableRecyclerAdapter adapter = getSelectableAdapter();
             adapter.setIsSelectable(true);
         }
-        toggleSelection(position);
-
-        return true;
     }
 
     private void toggleSelection(int position){
