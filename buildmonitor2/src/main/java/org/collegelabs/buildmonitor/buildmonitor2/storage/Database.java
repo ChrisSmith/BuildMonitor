@@ -114,7 +114,7 @@ public class Database  {
     }
 
     public void deleteBuildType(long id) {
-        Db.delete(BuildTypeDto.TABLE, " where buildTypeId = ?", ""+id);
+        Db.delete(BuildTypeDto.TABLE, "buildTypeId = ?", ""+id);
     }
 
     static class OpenHelper extends SQLiteOpenHelper {
