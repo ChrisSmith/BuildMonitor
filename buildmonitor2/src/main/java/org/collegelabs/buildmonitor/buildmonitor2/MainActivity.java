@@ -47,7 +47,6 @@ public class MainActivity extends Activity implements OnItemClickListener, Actio
 
         _adapter = new ProjectSummaryAdapter(this, _gridView, _gridView);
         _gridView.setAdapter(_adapter);
-        _gridView.setLayoutManager(new GridLayoutManager(this, 2));
         _gridView.setActionModeCallback(this);
         _gridView.setOnItemClickListener(this);
         _gridView.setOnItemCheckedStateChangedListener(this);

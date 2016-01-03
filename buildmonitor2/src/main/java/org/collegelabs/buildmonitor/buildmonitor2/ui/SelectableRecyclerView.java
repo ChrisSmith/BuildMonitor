@@ -44,7 +44,11 @@ public class SelectableRecyclerView extends RecyclerView
 
     @Override
     public void setAdapter(Adapter adapter) {
-        super.setAdapter((SelectableRecyclerAdapter)adapter);
+        if(!isInEditMode()){
+            super.setAdapter((SelectableRecyclerAdapter)adapter);
+        }else{
+            super.setAdapter(adapter);
+        }
     }
 
     public SelectableRecyclerAdapter getSelectableAdapter(){

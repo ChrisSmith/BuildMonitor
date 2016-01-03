@@ -46,7 +46,6 @@ public class BuildStatusActivity extends Activity implements OnItemClickListener
         _buildTypeId = bundle.getInt("buildTypeId");
 
         _adapter = new BuildChainAdapter(this, this);
-        dependenciesView.setLayoutManager(new LinearLayoutManager(this));
         dependenciesView.setAdapter(_adapter);
         dependenciesView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         dependenciesView.setOnItemClickListener(this);

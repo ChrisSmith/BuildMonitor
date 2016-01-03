@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="16dp"
-        >
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
     <TextView android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:id="@+id/build_status"
-              android:text="SUCCESS"
+              tools:text="SUCCESS"
             />
 
     <TextView
             android:id="@+id/build_starttime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1 hour ago"
-            android:layout_alignParentRight="true"
+            tools:text="1 hour ago"
+            android:layout_alignParentEnd="true"
             />
 </RelativeLayout>
