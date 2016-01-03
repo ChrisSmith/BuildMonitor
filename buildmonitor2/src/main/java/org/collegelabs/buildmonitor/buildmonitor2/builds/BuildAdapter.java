@@ -34,6 +34,16 @@ public class BuildAdapter extends ArrayAdapter<Build> {
     }
 
     @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).id;
+    }
+
+    @Override
     public View getView(int position, View view, ViewGroup parent) {
         Build item = this.getItem(position);
 
@@ -52,7 +62,7 @@ public class BuildAdapter extends ArrayAdapter<Build> {
 
         Resources resources = view.getContext().getResources();
 
-        BuildStatus status = item.status.equalsIgnoreCase("SUCCESS") ? BuildStatus.Success : BuildStatus.Failure;
+        BuildStatus status = item.getBuildStatus();
         if(status == BuildStatus.Failure) {
             holder.status.setTextColor(resources.getColor(R.color.red_stroke));
         } else if(item.running){

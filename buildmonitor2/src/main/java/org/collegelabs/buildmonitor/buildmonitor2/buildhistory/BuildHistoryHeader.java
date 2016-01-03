@@ -13,8 +13,12 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.collegelabs.buildmonitor.buildmonitor2.R;
+import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildStatus;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 
 import java.text.SimpleDateFormat;
@@ -26,17 +30,25 @@ import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import timber.log.Timber;
 
-public class BuildHistoryHeader {
+public class BuildHistoryHeader implements OnChartValueSelectedListener {
 
     private final Context _context;
+    private final OnChartSelectedListener _onChartSelectedListener;
     @InjectView(R.id.build_history_chart) public BarChart chart;
     @InjectView(R.id.build_history_projectname) public TextView projectName;
     @InjectView(R.id.build_history_name) public TextView buildName;
     private final View _view;
 
-    public BuildHistoryHeader(Context context){
+    public static SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    private ArrayList<String> _xvals;
+    private ArrayList<String> _yvals;
+
+    public BuildHistoryHeader(Context context, OnChartSelectedListener onChartSelectedListener){
         _context = context;
+        _onChartSelectedListener = onChartSelectedListener;
         _view = LayoutInflater.from(_context).inflate(R.layout.build_history_header, null);
         ButterKnife.inject(this, _view);
         customizeChart();
@@ -53,12 +65,12 @@ public class BuildHistoryHeader {
 
     private void customizeChart() {
         chart.setDrawValueAboveBar(false);
-        chart.setDrawHighlightArrow(false);
         chart.setDescription("");
         chart.setGridBackgroundColor(_context.getColor(R.color.white));
         chart.setDoubleTapToZoomEnabled(false);
         chart.setPinchZoom(false);
         chart.getAxisRight().setEnabled(false);
+        chart.setOnChartValueSelectedListener(this);
 
         XAxis xAxis = chart.getXAxis();
         xAxis.setGridColor(_context.getColor(R.color.grey));
@@ -76,11 +88,11 @@ public class BuildHistoryHeader {
     }
 
     public void updateChart(List<Build> builds){
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
         HashMap<String, BuildStat> groups = new HashMap<>();
 
         for (Build b : builds){
-            String key = df.format(b.startDate);
+            String key = DateFormat.format(b.startDate);
             BuildStat value = groups.get(key);
             value = value != null ? value : new BuildStat();
 
@@ -112,7 +124,6 @@ public class BuildHistoryHeader {
                 _context.getColor(R.color.red_fill),
         });
         set1.setStackLabels(new String[] { "Passes", "Failures" });
-        set1.setHighlightEnabled(false);
         set1.setDrawValues(false);
         set1.setBarSpacePercent(20);
 
@@ -124,6 +135,21 @@ public class BuildHistoryHeader {
         chart.setData(data);
         chart.invalidate();
         chart.setVisibility(View.VISIBLE);
+
+        _xvals = xVals;
+        _yvals = xVals;
+    }
+
+    @Override
+    public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
+        String date = _xvals.get(e.getXIndex());
+        int stackIndex = h.getStackIndex();
+        _onChartSelectedListener.onValueSelected(date, stackIndex == 0 ? BuildStatus.Success : BuildStatus.Failure);
+    }
+
+    @Override
+    public void onNothingSelected() {
+        _onChartSelectedListener.selectionCleared();
     }
 
     private static class BuildStat {
