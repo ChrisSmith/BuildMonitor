@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
@@ -31,9 +32,9 @@ public class BuildStatusActivity extends Activity implements OnItemClickListener
     @InjectView(R.id.buildstatus_dependencies) public SelectableRecyclerView dependenciesView;
 
     private Subscription _subscription;
-    private int _buildId;
-    private int _buildTypeId;
+
     private BuildChainAdapter _adapter;
+    private BuildStatusViewModel _model;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,17 +43,18 @@ public class BuildStatusActivity extends Activity implements OnItemClickListener
         ButterKnife.inject(this);
 
         Bundle bundle = getIntent().getExtras();
-        _buildId = bundle.getInt("sqliteBuildId");
-        _buildTypeId = bundle.getInt("buildTypeId");
-
+        _model = new BuildStatusViewModel(bundle.getInt("sqliteBuildId", -1), bundle.getInt("buildTypeId", -1));
         _adapter = new BuildChainAdapter(this, this);
+        _adapter.setStatusViewModel(_model);
+
         dependenciesView.setAdapter(_adapter);
         dependenciesView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         dependenciesView.setOnItemClickListener(this);
 
+
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(b -> Observable.from(b))
-                .filter(f -> f.buildType.sqliteBuildId == _buildTypeId)
+                .filter(f -> f.buildType.sqliteBuildId == _model.BuildTypeId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .first()
@@ -62,15 +64,23 @@ public class BuildStatusActivity extends Activity implements OnItemClickListener
     private void onGotBuild(BuildTypeWithCredentials buildTypeWithCredentials) {
         RxUtil.unsubscribe(_subscription);
 
+        getActionBar().setTitle(buildTypeWithCredentials.buildType.displayName);
+
         TeamCityService teamCityService = ServiceHelper.getService(buildTypeWithCredentials.credentials);
-        _subscription = BuildChainObservable.create(teamCityService, _buildId)
+        _subscription = BuildChainObservable.create(teamCityService, _model.BuildId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onReceivePartialBuildChain, e -> Timber.e(e, "Failure getting build details"));
     }
 
     private void onReceivePartialBuildChain(BuildDetailsResponse response) {
-        _adapter.addItem(response);
+        if(_model.BuildId != response.buildId){
+            // the final build will be in the header
+            _adapter.addItem(response);
+        }
+
+        _model.addSnapshotDependency(response);
+        _adapter.notifyItemChanged(0);
     }
 
     @Override

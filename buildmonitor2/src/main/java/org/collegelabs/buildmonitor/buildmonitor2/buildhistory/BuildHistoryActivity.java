@@ -16,12 +16,11 @@ import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildStatus;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.ProjectSummaryService;
 import org.collegelabs.buildmonitor.buildmonitor2.buildstatus.BuildStatusActivity;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.TcUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
-import org.collegelabs.buildmonitor.buildmonitor2.util.Linq;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -32,7 +31,6 @@ import butterknife.InjectView;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 import static org.collegelabs.buildmonitor.buildmonitor2.util.Linq.*;
@@ -139,7 +137,7 @@ public class BuildHistoryActivity extends Activity implements OnChartSelectedLis
         Timber.d("Filtering by %s %s", date, buildStatus.toString());
 
         final ArrayList<Build> builds = toList(where(_builds,
-                b -> b.getBuildStatus() == buildStatus
+                b -> TcUtil.getBuildStatus(b.status) == buildStatus
                         && BuildHistoryHeader.DateFormat.format(b.startDate).equals(date)));
 
         _adapter.clear();

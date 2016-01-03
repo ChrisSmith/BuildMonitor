@@ -6,16 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.TcUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
 
 /**
  */
@@ -62,7 +59,7 @@ public class BuildAdapter extends ArrayAdapter<Build> {
 
         Resources resources = view.getContext().getResources();
 
-        BuildStatus status = item.getBuildStatus();
+        BuildStatus status = TcUtil.getBuildStatus(item.status);
         if(status == BuildStatus.Failure) {
             holder.status.setTextColor(resources.getColor(R.color.red_stroke));
         } else if(item.running){

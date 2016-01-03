@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/buildchain_header_status"
+        android:layout_alignParentEnd="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="SUCCESS"
+        />
+
+    <TextView
+        android:id="@+id/buildchain_header_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Unit Tests"
+        android:layout_toStartOf="@id/buildchain_header_status"
+        android:layout_alignParentStart="true"
+        />
+
+    <TextView
+        android:id="@+id/buildchain_header_details"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp"
+        tools:text="Build details"
+        android:textColor="@color/red_fill"
+        android:layout_below="@id/buildchain_header_name"
+        />
+
+</RelativeLayout>

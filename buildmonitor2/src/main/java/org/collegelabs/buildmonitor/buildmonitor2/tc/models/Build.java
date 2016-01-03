@@ -18,10 +18,5 @@ public class Build {
     public String webUrl;
     public Date startDate;
 
-    public BuildStatus getBuildStatus(){
-        return status.equalsIgnoreCase("SUCCESS")
-                ? BuildStatus.Success
-                : BuildStatus.Failure;
-    }
 }
 
