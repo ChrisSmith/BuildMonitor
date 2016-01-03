@@ -33,11 +33,14 @@ public class BuildTypeDto {
         dto.projectName = c.getString(c.getColumnIndexOrThrow("projectName"));
         dto.projectId = c.getString(c.getColumnIndexOrThrow("projectId"));
         dto.displayName = c.getString(c.getColumnIndexOrThrow("displayName"));
-        dto.id = c.getInt(c.getColumnIndexOrThrow("buildTypeId"));
+        dto.sqliteBuildId = c.getInt(c.getColumnIndexOrThrow("buildTypeId"));
         dto.serverId = c.getInt(c.getColumnIndexOrThrow("serverId"));
         return dto;
     }
 
+    /**
+     * the remote sqliteBuildId
+     */
     public String buildTypeStringId;
     public String name;
     public String href;
@@ -45,13 +48,17 @@ public class BuildTypeDto {
     public String projectName;
     public String projectId;
     public String displayName;
-    public int id;
+
+    /**
+     * the local sqlite db id
+     */
+    public int sqliteBuildId;
     public int serverId;
 
     public ContentValues getContentValues(){
         ContentValues cv = new ContentValues();
-        if(this.id > 0){
-            cv.put("buildTypeId", this.id);
+        if(this.sqliteBuildId > 0){
+            cv.put("buildTypeId", this.sqliteBuildId);
         }
 
         cv.put("ServerId", this.serverId);

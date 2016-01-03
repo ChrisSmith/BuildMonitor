@@ -66,8 +66,7 @@ public class MainActivity extends Activity implements OnItemClickListener, Actio
         Observable<ArrayList<ProjectSummary>> o1 = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(builds -> getObs(builds, pulse));
 
-        _sub = o1.startWith(getEmptyProjectSummaryList())
-                .subscribeOn(Schedulers.newThread())
+        _sub = o1.subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::UpdateUI, e -> Timber.e(e, "Failure getting project"));
 
@@ -80,13 +79,14 @@ public class MainActivity extends Activity implements OnItemClickListener, Actio
 
         for(BuildTypeWithCredentials buildType : builds){
             final String displayName = buildType.buildType.displayName;
-            final int buildId = buildType.buildType.id;
+            final int buildId = buildType.buildType.sqliteBuildId;
 
             ProjectSummaryService service = new ProjectSummaryService();
 
             ProjectSummary loadingSummary = new ProjectSummary();
             loadingSummary.status = BuildStatus.Loading;
             loadingSummary.name = displayName;
+            loadingSummary.sqliteBuildId = buildType.buildType.sqliteBuildId;
 
             sources.add(pulse
                 .flatMap(i -> service.getMostRecentBuild(buildType))
@@ -108,14 +108,6 @@ public class MainActivity extends Activity implements OnItemClickListener, Actio
         Timber.e("Failed to load build", throwable);
 
         return summary;
-    }
-
-    private ArrayList<ProjectSummary> getEmptyProjectSummaryList() {
-        ArrayList<ProjectSummary> emptyList = new ArrayList<>();
-        ProjectSummary summary = new ProjectSummary();
-        summary.status = BuildStatus.Loading;
-        emptyList.add(summary);
-        return emptyList;
     }
 
     private void UpdateUI(List<ProjectSummary> summaries) {
@@ -168,7 +160,7 @@ public class MainActivity extends Activity implements OnItemClickListener, Actio
         ProjectSummary projectSummary = _adapter.getItem(position);
         try {
 //            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(projectSummary.webUrl)));
-            startActivity(BuildHistoryActivity.getIntent(this, projectSummary.buildId));
+            startActivity(BuildHistoryActivity.getIntent(this, projectSummary.sqliteBuildId));
         } catch (Exception e) {
             Timber.e(e, "Failed to open " + projectSummary.webUrl);
         }

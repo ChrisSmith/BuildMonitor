@@ -1,29 +1,20 @@
 package org.collegelabs.buildmonitor.buildmonitor2.builds;
 
-import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
-import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeDto;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildDetailsResponse;
-import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildType;
+
 import rx.Observable;
 
-import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 /**
  */
 public class ProjectSummaryService {
 
-    public static ProjectSummary makeProjectSummary(int buildId, String displayName, BuildDetailsResponse response) {
+    public static ProjectSummary makeProjectSummary(int sqliteBuildId, String displayName, BuildDetailsResponse response) {
         ProjectSummary summary = new ProjectSummary();
         summary.name = displayName;
         summary.startDate = response.startDate;
@@ -32,7 +23,7 @@ public class ProjectSummaryService {
         summary.statusText = response.statusText;
         summary.percentageComplete = response.runningInfo != null ? response.runningInfo.percentageComplete : 100;
         summary.isRunning = response.running;
-        summary.buildId = buildId;
+        summary.sqliteBuildId = sqliteBuildId;
 
 
         return summary;

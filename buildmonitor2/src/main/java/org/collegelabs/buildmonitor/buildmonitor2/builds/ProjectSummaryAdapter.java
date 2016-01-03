@@ -17,6 +17,7 @@ import org.collegelabs.buildmonitor.buildmonitor2.ui.SelectableRecyclerAdapter;
 import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ProjectSummaryAdapter extends SelectableRecyclerAdapter<ProjectSummaryAdapter.ViewHolder> {
@@ -54,7 +55,7 @@ public class ProjectSummaryAdapter extends SelectableRecyclerAdapter<ProjectSumm
     @Override
     public long getItemId(int position) {
         ProjectSummary item = _items.get(position);
-        return item == null ? RecyclerView.NO_ID: item.buildId;
+        return item == null ? RecyclerView.NO_ID: item.sqliteBuildId;
     }
 
     @Override
@@ -68,7 +69,9 @@ public class ProjectSummaryAdapter extends SelectableRecyclerAdapter<ProjectSumm
     }
 
     public void reset(List<ProjectSummary> items) {
-        // TODO implement merge
+
+        Collections.sort(items, (ProjectSummary lhs, ProjectSummary rhs) -> lhs.sqliteBuildId - rhs.sqliteBuildId);
+
         _items = items;
         notifyDataSetChanged();
     }
@@ -78,7 +81,7 @@ public class ProjectSummaryAdapter extends SelectableRecyclerAdapter<ProjectSumm
         int[] items = new int[positions.length];
 
         for(int i = 0; i < items.length; i++){
-            items[i] = getItem(positions[i]).buildId;
+            items[i] = getItem(positions[i]).sqliteBuildId;
         }
 
         return items;

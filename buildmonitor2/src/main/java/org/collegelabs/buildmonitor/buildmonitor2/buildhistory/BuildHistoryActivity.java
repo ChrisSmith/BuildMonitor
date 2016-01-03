@@ -47,7 +47,7 @@ public class BuildHistoryActivity extends Activity {
         ButterKnife.inject(this);
 
         Bundle bundle = getIntent().getExtras();
-        _buildId = bundle.getInt("buildId");
+        _buildId = bundle.getInt("sqliteBuildId");
 
         _adapter = new BuildAdapter(this);
         listView.setAdapter(_adapter);
@@ -59,7 +59,7 @@ public class BuildHistoryActivity extends Activity {
 
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(b -> Observable.from(b))
-                .filter(f -> f.buildType.id == _buildId)
+                .filter(f -> f.buildType.sqliteBuildId == _buildId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .first()
@@ -113,7 +113,7 @@ public class BuildHistoryActivity extends Activity {
 
     public static Intent getIntent(Context context, int buildId){
         Intent intent = new Intent(context, BuildHistoryActivity.class);
-        intent.putExtra("buildId", buildId);
+        intent.putExtra("sqliteBuildId", buildId);
         return intent;
     }
 }
