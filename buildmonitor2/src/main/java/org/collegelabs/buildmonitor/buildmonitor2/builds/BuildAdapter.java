@@ -11,6 +11,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
 
 import java.text.DateFormat;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 
 /**
  */
-public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
+public class BuildAdapter extends ArrayAdapter<Build> {
 
     private final LayoutInflater inflater;
 
@@ -34,7 +35,7 @@ public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        BuildViewModel item = this.getItem(position);
+        Build item = this.getItem(position);
 
         ViewHolder holder;
         if (view != null) {
@@ -45,14 +46,16 @@ public class BuildAdapter extends ArrayAdapter<BuildViewModel> {
             view.setTag(holder);
         }
 
-        holder.status.setText(item.isRunning ? "[Running] " + item.status + " " + item.percentageComplete +"%" : item.status);
+
+        holder.status.setText(item.running ? "[Running] " + item.status + " " + item.percentageComplete +"%" : item.status);
         holder.startTime.setText(TimeUtil.human(item.startDate));
 
         Resources resources = view.getContext().getResources();
 
-        if(item.buildStatus == BuildStatus.Failure) {
+        BuildStatus status = item.status.equalsIgnoreCase("SUCCESS") ? BuildStatus.Success : BuildStatus.Failure;
+        if(status == BuildStatus.Failure) {
             holder.status.setTextColor(resources.getColor(R.color.red_stroke));
-        } else if(item.isRunning){
+        } else if(item.running){
             holder.status.setTextColor(resources.getColor(R.color.blue_stroke));
         } else {
             holder.status.setTextColor(resources.getColor(R.color.green_stroke));

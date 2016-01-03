@@ -38,6 +38,10 @@
                 android:value="org.collegelabs.buildmonitor.buildmonitor2.MainActivity" />
         </activity>
 
+
+        <activity android:name=".buildstatus.BuildStatusActivity" >
+        </activity>
+
     </application>
 
 </manifest>

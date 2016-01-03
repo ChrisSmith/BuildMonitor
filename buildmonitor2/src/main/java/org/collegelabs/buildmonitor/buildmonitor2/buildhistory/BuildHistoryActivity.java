@@ -3,43 +3,24 @@ package org.collegelabs.buildmonitor.buildmonitor2.buildhistory;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
 
 import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildAdapter;
-import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildViewModel;
 import org.collegelabs.buildmonitor.buildmonitor2.builds.ProjectSummaryService;
+import org.collegelabs.buildmonitor.buildmonitor2.buildstatus.BuildStatusActivity;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
-import org.collegelabs.buildmonitor.buildmonitor2.util.ActivityUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -57,6 +38,7 @@ public class BuildHistoryActivity extends Activity {
     private Subscription _subscription;
     private BuildAdapter _adapter;
     private BuildHistoryHeader _header;
+    private int _buildId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +47,7 @@ public class BuildHistoryActivity extends Activity {
         ButterKnife.inject(this);
 
         Bundle bundle = getIntent().getExtras();
-        int buildId = bundle.getInt("buildId");
+        _buildId = bundle.getInt("buildId");
 
         _adapter = new BuildAdapter(this);
         listView.setAdapter(_adapter);
@@ -77,7 +59,7 @@ public class BuildHistoryActivity extends Activity {
 
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
                 .flatMap(b -> Observable.from(b))
-                .filter(f -> f.buildType.id == buildId)
+                .filter(f -> f.buildType.id == _buildId)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .first()
@@ -90,10 +72,10 @@ public class BuildHistoryActivity extends Activity {
             return;
         }
 
-        ActivityUtil.openUrl(this, () -> {
-            BuildViewModel item = (BuildViewModel) adapterView.getItemAtPosition(position);
-            return item == null ? null : item.webUrl;
-        });
+        Build item = (Build) adapterView.getItemAtPosition(position);
+        if(item != null){
+            startActivity(BuildStatusActivity.getIntent(this, _buildId, item.id));
+        }
     }
 
 
@@ -119,13 +101,8 @@ public class BuildHistoryActivity extends Activity {
     }
 
     private void UpdateUI(BuildCollectionResponse response) {
-
         _adapter.clear();
-        ArrayList<BuildViewModel> models = new ArrayList<>(response.builds.size());
-        for (Build b : response.builds){
-            models.add(new BuildViewModel(b));
-        }
-        _adapter.addAll(models);
+        _adapter.addAll(response.builds);
         _header.updateChart(response.builds);
     }
 
