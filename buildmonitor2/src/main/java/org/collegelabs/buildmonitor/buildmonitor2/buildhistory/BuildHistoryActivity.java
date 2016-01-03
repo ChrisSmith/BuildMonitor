@@ -80,6 +80,13 @@ public class BuildHistoryActivity extends Activity implements OnChartSelectedLis
             return;
         }
 
+        if(position == 0){
+            // chart
+            selectionCleared();
+            _header.chart.highlightValues(null);
+            return;
+        }
+
         Build item = (Build) adapterView.getItemAtPosition(position);
         if(item != null){
             startActivity(BuildStatusActivity.getIntent(this, _buildId, item.id));
