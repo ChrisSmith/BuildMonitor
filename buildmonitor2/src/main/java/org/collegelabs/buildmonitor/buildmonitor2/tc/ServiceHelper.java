@@ -18,7 +18,20 @@ import java.util.concurrent.TimeUnit;
 
 public class ServiceHelper {
 
+
+    public static TeamCityService2 getService2(Credentials credentials){
+        return getCommonBuilder(credentials, false)
+                .build()
+                .create(TeamCityService2.class);
+    }
+
     public static TeamCityService getService(Credentials credentials){
+        return getCommonBuilder(credentials, true)
+                .build()
+                .create(TeamCityService.class);
+    }
+
+    private static RestAdapter.Builder getCommonBuilder(Credentials credentials, boolean prefixWithAppRest) {
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyyMMdd'T'HHmmssZ")
                 .create();
@@ -34,7 +47,7 @@ public class ServiceHelper {
         }
 
         RestAdapter.Builder builder = new RestAdapter.Builder()
-                .setEndpoint(getEndpoint(credentials))
+                .setEndpoint(getEndpoint(credentials, prefixWithAppRest))
                 .setClient(new OkClient(client))
                 .setLogLevel(RestAdapter.LogLevel.BASIC)
                 .setRequestInterceptor(new JsonHeaderInterceptor())
@@ -45,19 +58,22 @@ public class ServiceHelper {
             final String authHeader = "Basic " + Base64.encodeToString(userAndPassword.getBytes(), Base64.NO_WRAP);
             builder.setRequestInterceptor(new BasicAuthInterceptor(authHeader));
         }
-
-        return builder.build().create(TeamCityService.class);
+        return builder;
     }
 
-    public static String getEndpoint(Credentials credentials){
+    public static String getEndpoint(Credentials credentials, boolean prefixWithAppRest){
         HttpUrl.Builder endpoint = HttpUrl.parse(credentials.server).newBuilder();
 
         if(credentials.isGuest){
             endpoint.addPathSegment("guestAuth");
         }
 
-        return endpoint.addPathSegment("app")
-                .addPathSegment("rest")
+        if(prefixWithAppRest){
+            endpoint.addPathSegment("app")
+                    .addPathSegment("rest");
+        }
+
+        return endpoint
                 .build()
                 .toString();
     }

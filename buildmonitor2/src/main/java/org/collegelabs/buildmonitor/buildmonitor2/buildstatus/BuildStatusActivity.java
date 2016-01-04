@@ -14,6 +14,7 @@ import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentia
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildDetailsResponse;
+import org.collegelabs.buildmonitor.buildmonitor2.tests.BuildTestsActivity;
 import org.collegelabs.buildmonitor.buildmonitor2.ui.OnItemClickListener;
 import org.collegelabs.buildmonitor.buildmonitor2.ui.SelectableRecyclerView;
 import org.collegelabs.buildmonitor.buildmonitor2.util.ActivityUtil;
@@ -92,10 +93,10 @@ public class BuildStatusActivity extends Activity implements OnItemClickListener
 
     @Override
     public void onClick(View v, int position) {
-        ActivityUtil.openUrl(this, () -> {
-            BuildDetailsResponse item = _adapter.getItem(position);
-            return item.webUrl;
-        });
+        // TODO generalize the getIntent pattern
+        // TODO don't rely on sqlBuildTypeId, just use the serverId
+        BuildDetailsResponse item = _adapter.getItem(position);
+        startActivity(BuildTestsActivity.getIntent(this, item.buildId, _model.BuildTypeId));
     }
 
     public static Intent getIntent(Context context, int buildTypeId, int buildId){

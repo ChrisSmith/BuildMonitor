@@ -3,6 +3,8 @@ package org.collegelabs.buildmonitor.buildmonitor2.tc;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildCollectionResponse;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildDetailsResponse;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.ProjectResponse;
+
+import retrofit.client.Response;
 import retrofit.http.GET;
 import retrofit.http.Path;
 import retrofit.http.Query;
@@ -27,5 +29,6 @@ public interface TeamCityService {
 
     @GET("/server")
     Observable<ServerResponse> getServer();
+
 }
 

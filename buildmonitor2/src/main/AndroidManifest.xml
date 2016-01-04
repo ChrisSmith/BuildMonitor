@@ -39,6 +39,9 @@
         </activity>
 
 
+        <activity android:name=".tests.BuildTestsActivity">
+        </activity>
+
         <activity android:name=".buildstatus.BuildStatusActivity" >
         </activity>
 

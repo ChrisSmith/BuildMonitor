@@ -1,5 +1,8 @@
 package org.collegelabs.buildmonitor.buildmonitor2.util;
 
+import org.apache.commons.csv.CSVParser;
+import org.collegelabs.buildmonitor.buildmonitor2.tests.TestCsvParser;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,6 +83,14 @@ public class Linq {
             result.add(item);
         }
 
+        return result;
+    }
+
+    public static <S, R> ArrayList<R> toList(Iterable<S> source, Func1<S, R> transform) {
+        ArrayList<R> result = new ArrayList<>();
+        for(S item : source){
+            result.add(transform.call(item));
+        }
         return result;
     }
 }
