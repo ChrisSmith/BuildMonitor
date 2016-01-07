@@ -1,33 +1,46 @@
 package org.collegelabs.buildmonitor.buildmonitor2.buildstatus;
 
+import org.collegelabs.buildmonitor.buildmonitor2.builds.BuildStatus;
+import org.collegelabs.buildmonitor.buildmonitor2.tc.TcUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.TeamCityService;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.Build;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.models.BuildDetailsResponse;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.functions.Func1;
+import timber.log.Timber;
 
 public class BuildChainObservable implements Observable.OnSubscribe<BuildDetailsResponse> {
 
+    public static Observable<BuildDetailsResponse> create(TeamCityService service, int fromBuildId, Func1<Build, Boolean> filter){
+        return Observable.create(new BuildChainObservable(service, fromBuildId, filter));
+    }
+
     public static Observable<BuildDetailsResponse> create(TeamCityService service, int fromBuildId){
-        return Observable.create(new BuildChainObservable(service, fromBuildId));
+        return create(service, fromBuildId, b -> true);
     }
 
     private final TeamCityService _service;
     private final int _originalBuildId;
-
+    private final Func1<Build, Boolean> _buildFilter;
+    
+    private static Semaphore _sem = new Semaphore(10);
 
     private Object _lock = new Object();
     private HashMap<Integer, Subscription> _requests = new HashMap<>();
 
-    public BuildChainObservable(TeamCityService service, int fromBuildId){
+    public BuildChainObservable(TeamCityService service, int fromBuildId, Func1<Build, Boolean> buildFilter){
         _service = service;
         _originalBuildId = fromBuildId;
+        _buildFilter = buildFilter;
     }
 
     //TODO for TC 9+ we can use this build locator to grab all builds in one request snapshotDependency:(to:(id:sqliteBuildId)
@@ -60,7 +73,15 @@ public class BuildChainObservable implements Observable.OnSubscribe<BuildDetails
                 return;
             }
 
+            try {
+                // TODO remove this hack. I need a better way to throttle requests
+                _sem.acquire();
+            } catch (InterruptedException e) {
+                subscriber.onError(e);
+            }
+
             _requests.put(buildId, _service.getBuild(buildId)
+                    .doOnEach(b -> _sem.release())
                     .map(b -> toBuild(subscriber, b))
                     .subscribe(
                             b -> {
@@ -89,7 +110,9 @@ public class BuildChainObservable implements Observable.OnSubscribe<BuildDetails
     private BuildDetailsResponse toBuild(Subscriber<? super BuildDetailsResponse> subscriber, BuildDetailsResponse response) {
 
         for(Build b : response.snapshotDependencies.builds){
-            addBuild(subscriber, b.id);
+            if(_buildFilter.call(b)){
+                addBuild(subscriber, b.id);
+            }
         }
 
         return response;

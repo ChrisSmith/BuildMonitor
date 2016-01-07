@@ -4,8 +4,10 @@ import org.apache.commons.csv.CSVParser;
 import org.collegelabs.buildmonitor.buildmonitor2.tests.TestCsvParser;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import rx.functions.Func1;
@@ -90,6 +92,27 @@ public class Linq {
         ArrayList<R> result = new ArrayList<>();
         for(S item : source){
             result.add(transform.call(item));
+        }
+        return result;
+    }
+
+
+    public static <S, K> HashMap<K, List<S>> groupBy(Iterable<S> source, Func1<S, K> keySelector){
+        return groupBy(source, keySelector, v -> v);
+    }
+
+    public static <S, K, V> HashMap<K, List<V>> groupBy(Iterable<S> source, Func1<S, K> keySelector, Func1<S, V> valueSelector){
+        HashMap<K, List<V>> result = new HashMap<>();
+        for(S item : source){
+            K key = keySelector.call(item);
+
+            if(!result.containsKey(key)){
+                result.put(key, new ArrayList<>());
+            }
+
+            List<V> list = result.get(key);
+            V value = valueSelector.call(item);
+            list.add(value);
         }
         return result;
     }

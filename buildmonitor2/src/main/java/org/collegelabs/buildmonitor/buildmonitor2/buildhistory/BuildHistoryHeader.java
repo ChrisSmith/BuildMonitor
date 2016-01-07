@@ -4,6 +4,7 @@ package org.collegelabs.buildmonitor.buildmonitor2.buildhistory;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
@@ -39,6 +40,9 @@ public class BuildHistoryHeader implements OnChartValueSelectedListener {
     @InjectView(R.id.build_history_chart) public BarChart chart;
     @InjectView(R.id.build_history_projectname) public TextView projectName;
     @InjectView(R.id.build_history_name) public TextView buildName;
+
+    @InjectView(R.id.build_history_morestats) Button editCredentialsButton;
+
     private final View _view;
 
     public static SimpleDateFormat DateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -46,12 +50,14 @@ public class BuildHistoryHeader implements OnChartValueSelectedListener {
     private ArrayList<String> _xvals;
     private ArrayList<String> _yvals;
 
-    public BuildHistoryHeader(Context context, OnChartSelectedListener onChartSelectedListener){
+    public BuildHistoryHeader(final Context context, final OnChartSelectedListener onChartSelectedListener, final int sqliteBuildId){
         _context = context;
         _onChartSelectedListener = onChartSelectedListener;
         _view = LayoutInflater.from(_context).inflate(R.layout.build_history_header, null);
         ButterKnife.inject(this, _view);
         customizeChart();
+
+        editCredentialsButton.setOnClickListener(c -> context.startActivity(BuildStatisticsActivity.getIntent(context, sqliteBuildId)));
     }
 
     public View getView(){

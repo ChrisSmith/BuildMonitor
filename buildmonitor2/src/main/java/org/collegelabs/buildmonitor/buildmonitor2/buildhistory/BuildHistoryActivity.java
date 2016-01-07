@@ -58,17 +58,17 @@ public class BuildHistoryActivity extends Activity implements OnChartSelectedLis
         _adapter = new BuildAdapter(this);
         listView.setAdapter(_adapter);
 
-        _header = new BuildHistoryHeader(this, this);
+        _header = new BuildHistoryHeader(this, this, _buildId);
         listView.addHeaderView(_header.getView());
 
         listView.setOnItemClickListener(this::onItemClick);
 
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
+                .subscribeOn(Schedulers.newThread())
                 .flatMap(b -> Observable.from(b))
                 .filter(f -> f.buildType.sqliteBuildId == _buildId)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
                 .first()
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onGotBuild, e -> Timber.e(e, "Failure getting project"));
 
     }

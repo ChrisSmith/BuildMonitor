@@ -3,38 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/build_history_projectname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="Project Name"
-        style="?android:textAppearanceSmall"
-        />
-    <TextView
-        android:id="@+id/build_history_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="Unit Tests"
-        style="?android:textAppearanceLarge"
+        android:text="Failures by build config"
+        android:padding="16dp"
         />
 
     <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/build_history_chart"
+        android:id="@+id/build_statistics_chart"
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:layout_marginTop="20dp"
         android:visibility="invisible"
         />
 
-    <Button
-        android:id="@+id/build_history_morestats"
-        android:text="More Stats"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/build_statistics_chart_textview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        tools:text="Deploy Site"
+        android:padding="16dp"
         />
-
 
 </LinearLayout>
