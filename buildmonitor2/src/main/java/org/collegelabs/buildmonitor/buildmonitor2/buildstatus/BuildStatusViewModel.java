@@ -15,7 +15,7 @@ public class BuildStatusViewModel {
 
     public String Name;
     public BuildStatus Status = BuildStatus.Loading;
-
+    public String AgentName;
 
     private ArrayList<BuildDetailsResponse> _responses = new ArrayList<>();
     private ArrayList<BuildDetailsResponse> _failedDeps = new ArrayList<>();
@@ -38,6 +38,7 @@ public class BuildStatusViewModel {
             Status = TcUtil.getBuildStatus(response.status);
             Name = response.buildType.name;
             IsRunning = response.running;
+            AgentName = response.agent.name;
         }
     }
 

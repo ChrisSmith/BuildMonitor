@@ -106,6 +106,7 @@ public class BuildChainAdapter extends SelectableRecyclerAdapter<RecyclerView.Vi
         @InjectView(R.id.buildchain_header_name) TextView buildname;
         @InjectView(R.id.buildchain_header_details) TextView details;
         @InjectView(R.id.buildchain_header_status) TextView status;
+        @InjectView(R.id.buildchain_agent_name) TextView agentName;
 
         public HeaderViewHolder(View itemView) {
             super(itemView);
@@ -130,6 +131,8 @@ public class BuildChainAdapter extends SelectableRecyclerAdapter<RecyclerView.Vi
                 status.setTextColor(context.getColor(R.color.green_stroke));
                 details.setTextColor(context.getColor(R.color.grey));
             }
+
+            agentName.setText(viewModel.AgentName);
         }
     }
 

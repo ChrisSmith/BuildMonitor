@@ -24,13 +24,25 @@
         />
 
     <TextView
+        android:id="@+id/buildchain_agent_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Agent: build01"
+        android:layout_toStartOf="@id/buildchain_header_status"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/buildchain_header_name"
+        android:paddingTop="4dp"
+        />
+
+
+    <TextView
         android:id="@+id/buildchain_header_details"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="8dp"
+        android:paddingTop="4dp"
         tools:text="Build details"
         android:textColor="@color/red_fill"
-        android:layout_below="@id/buildchain_header_name"
+        android:layout_below="@id/buildchain_agent_name"
         />
 
 </RelativeLayout>
