@@ -3,6 +3,10 @@ package org.collegelabs.buildmonitor.buildmonitor2.ui;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 
+import org.collegelabs.buildmonitor.buildmonitor2.logs.LogSearchResults;
+
+import java.util.ArrayList;
+
 public abstract class SelectableRecyclerAdapter<VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH>
 {

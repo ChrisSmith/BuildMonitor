@@ -53,6 +53,12 @@
         <activity android:name=".buildstatus.BuildStatusActivity" >
         </activity>
 
+        <activity
+            android:name=".logs.BuildLogActivity"
+            android:launchMode="singleTop" >
+
+        </activity>
+
     </application>
 
 </manifest>

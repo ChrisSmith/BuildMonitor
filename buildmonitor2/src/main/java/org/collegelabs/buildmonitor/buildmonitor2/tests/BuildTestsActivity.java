@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
+import org.collegelabs.buildmonitor.buildmonitor2.logs.BuildLogActivity;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
 import org.collegelabs.buildmonitor.buildmonitor2.ui.SelectableRecyclerView;
@@ -25,7 +27,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class BuildTestsActivity extends Activity {
+public class BuildTestsActivity extends Activity implements View.OnClickListener {
 
     @InjectView(R.id.buildtests_list) public RecyclerView recyclerView;
     private BuildTestAdapter _adapter;
@@ -65,7 +67,7 @@ public class BuildTestsActivity extends Activity {
                 .subscribe((r) -> {
 
                     getActionBar().setTitle(r.buildType.name);
-                    _adapter.setHeader(new BuildTestAdapter.HeaderViewModel(r));
+                    _adapter.setHeader(new BuildTestAdapter.HeaderViewModel(r, this));
 
                     onGotBuild(build);
                 }, e -> Timber.e(e, "Failed to get build"));
@@ -105,5 +107,10 @@ public class BuildTestsActivity extends Activity {
         intent.putExtra("buildId", buildId);
         intent.putExtra("sqliteBuildId", sqliteBuildId);
         return intent;
+    }
+
+    @Override
+    public void onClick(View v) {
+        startActivity(BuildLogActivity.getIntent(this, _sqliteBuildId, _buildId));
     }
 }

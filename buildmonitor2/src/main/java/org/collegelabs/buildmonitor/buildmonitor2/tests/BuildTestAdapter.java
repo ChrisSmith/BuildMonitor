@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.collegelabs.buildmonitor.buildmonitor2.R;
@@ -128,6 +129,7 @@ public class BuildTestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         @InjectView(R.id.buildtests_test_header_time) public TextView time;
         @InjectView(R.id.buildtests_test_header_status) public TextView status;
         @InjectView(R.id.buildtests_test_header_statusDetails) public TextView statusDetails;
+        @InjectView(R.id.buildtests_test_header_viewlogs) public Button logsButton;
 
         public HeaderViewHolder(View view) {
             super(view);
@@ -145,17 +147,20 @@ public class BuildTestAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             status.setText(details.status);
             statusDetails.setText(details.statusText);
             time.setText(DateFormat.format(details.startDate) + " " + DateFormat.format(details.finishDate));
+            logsButton.setOnClickListener(header.onLogsClickListener);
         }
     }
 
     public static class HeaderViewModel {
 
         public BuildDetailsResponse BuildDetails;
+        public View.OnClickListener onLogsClickListener;
 
         public HeaderViewModel() {}
 
-        public HeaderViewModel(BuildDetailsResponse buildDetails) {
+        public HeaderViewModel(BuildDetailsResponse buildDetails, View.OnClickListener listener) {
             BuildDetails = buildDetails;
+            onLogsClickListener = listener;
         }
     }
 }
