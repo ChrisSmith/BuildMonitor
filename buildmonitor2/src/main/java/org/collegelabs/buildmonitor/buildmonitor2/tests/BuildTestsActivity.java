@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
 
 import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
@@ -26,7 +27,7 @@ import timber.log.Timber;
 
 public class BuildTestsActivity extends Activity {
 
-    @InjectView(R.id.buildtests_list) public SelectableRecyclerView recyclerView;
+    @InjectView(R.id.buildtests_list) public RecyclerView recyclerView;
     private BuildTestAdapter _adapter;
     private int _sqliteBuildId;
     private Subscription _subscription;
@@ -51,7 +52,23 @@ public class BuildTestsActivity extends Activity {
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .first()
-                .subscribe(this::onGotBuild, e -> Timber.e(e, "Failure getting project"));
+                .subscribe(this::onRecievedBuildDetails, e -> Timber.e(e, "Failure getting project"));
+    }
+
+    private void onRecievedBuildDetails(BuildTypeWithCredentials build){
+        RxUtil.unsubscribe(_subscription);
+
+        _subscription = ServiceHelper.getService(build.credentials)
+                .getBuild(_buildId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((r) -> {
+
+                    getActionBar().setTitle(r.buildType.name);
+                    _adapter.setHeader(new BuildTestAdapter.HeaderViewModel(r));
+
+                    onGotBuild(build);
+                }, e -> Timber.e(e, "Failed to get build"));
     }
 
     private void onGotBuild(BuildTypeWithCredentials build) {

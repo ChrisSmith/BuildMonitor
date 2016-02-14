@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    >
+
+
+
+    <TextView
+        android:id="@+id/buildtests_test_header_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="FAILURE"
+        style="?android:attr/textAppearanceMedium"
+        />
+
+    <TextView
+        android:id="@+id/buildtests_test_header_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Jan 01 3:30"
+        style="?android:attr/textAppearanceSmall"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@id/buildtests_test_header_status"
+        android:gravity="right"
+        />
+
+
+    <TextView
+        android:id="@+id/buildtests_test_header_agent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Agent name"
+        style="?android:attr/textAppearanceSmall"
+        android:layout_below="@id/buildtests_test_header_status"
+        />
+
+
+
+    <TextView
+        android:id="@+id/buildtests_test_header_statusDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Snapshot Dependency Failure"
+        style="?android:attr/textAppearanceSmall"
+        android:layout_below="@id/buildtests_test_header_agent"
+        />
+
+    <Button
+        android:id="@+id/buildtests_test_header_viewlogs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="48dp"
+        android:paddingRight="48dp"
+        android:text="View Logs"
+        android:layout_below="@id/buildtests_test_header_statusDetails"
+        />
+
+</RelativeLayout>
