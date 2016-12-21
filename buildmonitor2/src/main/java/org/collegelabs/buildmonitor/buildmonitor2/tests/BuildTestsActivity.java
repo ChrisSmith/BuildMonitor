@@ -76,7 +76,7 @@ public class BuildTestsActivity extends Activity implements View.OnClickListener
     private void onGotBuild(BuildTypeWithCredentials build) {
         RxUtil.unsubscribe(_subscription);
 
-        _subscription = ServiceHelper.getService2(build.credentials)
+        _subscription = ServiceHelper.getService(build.credentials)
                 .getTestResults(_buildId)
                 .map(r -> {
                     try(InputStream in = r.getBody().in()){

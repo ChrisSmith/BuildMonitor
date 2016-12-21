@@ -12,23 +12,30 @@ import rx.Observable;
 
 public interface TeamCityService {
 
-    @GET("/projects/id:{projectId}")
+    String PREFIX = "/app/rest";
+
+    @GET(PREFIX + "/projects/id:{projectId}")
     Observable<ProjectResponse> getProject(@Path("projectId") String projectId);
 
-    @GET("/builds")
+    @GET(PREFIX + "/builds")
     Observable<BuildCollectionResponse> getBuilds(@Query("locator") String locator, @Query("fields") String fields);
 
-    @GET("/builds/{buildLocator}")
+    @GET(PREFIX + "/builds/{buildLocator}")
     Observable<BuildDetailsResponse> getBuild(@Path("buildLocator") String locator);
 
-    @GET("/builds/{id}")
+    @GET(PREFIX + "/builds/{id}")
     Observable<BuildDetailsResponse> getBuild(@Path("id") int id);
 
-    @GET("/buildTypes")
+    @GET(PREFIX + "/buildTypes")
     Observable<BuildTypeCollectionResponse> getBuildTypes();
 
-    @GET("/server")
+    @GET(PREFIX + "/server")
     Observable<ServerResponse> getServer();
 
+    @GET("/get/tests/buildId/{buildId}/tests-{buildId}.csv")
+    Observable<Response> getTestResults(@Path("buildId") int buildId);
+
+    @GET("/downloadBuildLog.html")
+    Observable<Response> getLog(@Query("buildId") int buildId);
 }
 

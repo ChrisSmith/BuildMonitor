@@ -83,7 +83,7 @@ public class BoyerMooreSearch {
     }
 
     /**
-     * Is needle[p:end] a prefix of needle?
+     * Is needle[p:end] a PREFIX of needle?
      */
     private static boolean isPrefix(char[] needle, int p) {
         for (int i = p, j = 0; i < needle.length; ++i, ++j) {

@@ -18,13 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ServiceHelper {
 
-
-    public static TeamCityService2 getService2(Credentials credentials){
-        return getCommonBuilder(credentials, false)
-                .build()
-                .create(TeamCityService2.class);
-    }
-
     public static TeamCityService getService(Credentials credentials){
         return getCommonBuilder(credentials, true)
                 .build()
@@ -47,7 +40,7 @@ public class ServiceHelper {
         }
 
         RestAdapter.Builder builder = new RestAdapter.Builder()
-                .setEndpoint(getEndpoint(credentials, prefixWithAppRest))
+                .setEndpoint(getEndpoint(credentials))
                 .setClient(new OkClient(client))
                 .setLogLevel(RestAdapter.LogLevel.BASIC)
                 .setRequestInterceptor(new JsonHeaderInterceptor())
@@ -61,16 +54,11 @@ public class ServiceHelper {
         return builder;
     }
 
-    public static String getEndpoint(Credentials credentials, boolean prefixWithAppRest){
+    public static String getEndpoint(Credentials credentials){
         HttpUrl.Builder endpoint = HttpUrl.parse(credentials.server).newBuilder();
 
         if(credentials.isGuest){
             endpoint.addPathSegment("guestAuth");
-        }
-
-        if(prefixWithAppRest){
-            endpoint.addPathSegment("app")
-                    .addPathSegment("rest");
         }
 
         return endpoint

@@ -137,7 +137,7 @@ public class BuildLogActivity extends Activity implements OnItemClickListener {
 
     private void onBuildLoadedDetails(BuildTypeWithCredentials build) {
 
-        ServiceHelper.getService2(build.credentials)
+        ServiceHelper.getService(build.credentials)
                 .getLog(_buildId)
                 .map(r -> DiskUtil.WriteBytesToDisk(r, _file))
                 .subscribeOn(Schedulers.newThread())
