@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ import org.collegelabs.buildmonitor.buildmonitor2.BuildMonitorApplication;
 import org.collegelabs.buildmonitor.buildmonitor2.R;
 import org.collegelabs.buildmonitor.buildmonitor2.storage.BuildTypeWithCredentials;
 import org.collegelabs.buildmonitor.buildmonitor2.tc.ServiceHelper;
+import org.collegelabs.buildmonitor.buildmonitor2.ui.OnItemClickListener;
 import org.collegelabs.buildmonitor.buildmonitor2.util.DiskUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.util.RxUtil;
 import org.collegelabs.buildmonitor.buildmonitor2.util.TimeUtil;
@@ -32,7 +34,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class BuildLogActivity extends Activity {
+public class BuildLogActivity extends Activity implements OnItemClickListener {
 
     private int _buildId;
     private int _sqliteBuildId;
@@ -78,10 +80,10 @@ public class BuildLogActivity extends Activity {
 
 
         logAdapter = new BuildLogAdapter();
-        searchAdapter = new LogSearchResultsAdapter(this);
+        searchAdapter = new LogSearchResultsAdapter(this, this);
 
         logList.setAdapter(logAdapter);
-        
+
         displaySearchViews(false);
 
         _subscription = BuildMonitorApplication.Db.getAllBuildTypesWithCreds()
@@ -104,25 +106,6 @@ public class BuildLogActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         handleIntent(intent);
     }
-//
-//    @Override
-//    protected void onListItemClick(ListView l, View v, int position, long id) {
-//        if(!showingSearchViews){
-//            return;
-//        }
-//
-//        LogSearchResults.LogSearchResult result = searchAdapter.getItem(position);
-//        final int positionForOffset = logAdapter.getPositionForOffset(result.offset);
-//
-//        searchMenuItem.collapseActionView();
-//        final ListView listView = getListView();
-//        listView.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                listView.setSelection(positionForOffset);
-//            }
-//        }, 0);
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -154,8 +137,6 @@ public class BuildLogActivity extends Activity {
 
     private void onBuildLoadedDetails(BuildTypeWithCredentials build) {
 
-
-
         ServiceHelper.getService2(build.credentials)
                 .getLog(_buildId)
                 .map(r -> DiskUtil.WriteBytesToDisk(r, _file))
@@ -170,17 +151,12 @@ public class BuildLogActivity extends Activity {
 
     private void displaySearchViews(boolean showSearch){
         showingSearchViews = showSearch;
-//        ListView listView = getListView();
-//
-//        listView.setClickable(showingSearchViews);
-//        listView.setLongClickable(showingSearchViews);
-//
-//        if(showingSearchViews){
-//            this.viewsetListAdapter(searchAdapter);
-//        } else {
-//            setListAdapter(logAdapter);
-////            listView.setSelector(android.R.color.transparent);
-//        }
+
+        if(showingSearchViews){
+            logList.setAdapter(searchAdapter);
+        } else {
+            logList.setAdapter(logAdapter);
+        }
     }
 
 
@@ -224,5 +200,19 @@ public class BuildLogActivity extends Activity {
         } finally {
             Timber.d("Search took " + TimeUtil.human(System.currentTimeMillis() - startTime) + " for " + query);
         }
+    }
+
+    @Override
+    public void onClick(View v, int position) {
+        if(!showingSearchViews){
+            return;
+        }
+
+        LogSearchResults.LogSearchResult result = searchAdapter.getItem(position);
+        final int positionForOffset = logAdapter.getPositionForOffset(result.offset);
+
+        searchMenuItem.collapseActionView();
+
+        logList.postDelayed(() -> logList.scrollToPosition(positionForOffset), 0);
     }
 }
