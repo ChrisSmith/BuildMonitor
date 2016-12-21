@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 public class ServiceHelper {
 
     public static TeamCityService getService(Credentials credentials){
-        return getCommonBuilder(credentials, true)
+        return getCommonBuilder(credentials)
                 .build()
                 .create(TeamCityService.class);
     }
 
-    private static RestAdapter.Builder getCommonBuilder(Credentials credentials, boolean prefixWithAppRest) {
+    private static RestAdapter.Builder getCommonBuilder(Credentials credentials) {
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyyMMdd'T'HHmmssZ")
                 .create();
