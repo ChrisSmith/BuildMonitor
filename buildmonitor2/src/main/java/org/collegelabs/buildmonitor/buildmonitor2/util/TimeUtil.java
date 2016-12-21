@@ -18,6 +18,15 @@ public class TimeUtil {
             TimeUnit.SECONDS.toMillis(1)
     );
 
+    private static final List<String> humanUnitsShort = Arrays.asList(
+            "yr",
+            "mo",
+            "d",
+            "h",
+            "m",
+            "s"
+    );
+
     private static final List<String> humanUnits = Arrays.asList(
             "year",
             "month",
@@ -36,16 +45,24 @@ public class TimeUtil {
             "seconds"
     );
 
-    public static String human(Date date) {
+    public static String human(Date date, boolean longUnits) {
         if(date == null){
             return "";
         }
 
         long ms = new Date().getTime() - date.getTime();
-        return human(ms);
+        return human(ms, longUnits);
+    }
+
+    public static String human(Date date) {
+        return human(date, true);
     }
 
     public static String human(long duration) {
+        return human(duration, true);
+    }
+
+    public static String human(long duration, boolean longUnits) {
         if(duration < 1000){
             return "less than a second ago";
         }
@@ -55,17 +72,23 @@ public class TimeUtil {
             long temp = duration / current;
 
             if (temp > 0) {
-                String unit = temp != 1 ? pluralHumanUnits.get(i) : humanUnits.get(i);
+
+                String unit;
+                if(longUnits){
+                    unit = temp != 1 ? pluralHumanUnits.get(i) : humanUnits.get(i);
+                }else{
+                    unit = humanUnitsShort.get(i);
+                }
 
                 return new StringBuilder(unit.length() + 10)
                         .append(temp)
-                        .append(" ")
+                        .append(longUnits ? " " : "")
                         .append(unit)
                         .append(" ago")
                         .toString();
             }
         }
 
-        return duration + " milliseconds ago";
+        return duration + " ms ago";
     }
 }

@@ -28,25 +28,29 @@
              android:layout_alignParentStart="true"
         />
 
+    <TextView
+        android:id="@+id/project_summary_starttime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="1 hour ago"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/project_summary_name"
+        style="@android:style/TextAppearance.Small"
+        android:layout_marginTop="4dp"
+        />
+
     <TextView android:id="@+id/project_summary_status"
-              android:layout_width="match_parent"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               tools:text="Passing"
-              android:layout_below="@+id/project_summary_name"
-              android:layout_alignStart="@+id/project_summary_name"
+              android:layout_below="@id/project_summary_name"
+              android:layout_alignStart="@id/project_summary_name"
+              android:layout_toLeftOf="@id/project_summary_starttime"
               style="@android:style/TextAppearance.Medium"
               android:textColor="@color/green_fill"
             />
 
-    <TextView
-            android:id="@+id/project_summary_starttime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="1 hour ago"
-            android:layout_alignParentEnd="true"
-            android:layout_alignBaseline="@+id/project_summary_status"
-            style="@android:style/TextAppearance.Small"
-            />
+
 
 
 </org.collegelabs.buildmonitor.buildmonitor2.ui.CheckableRelativeLayout>

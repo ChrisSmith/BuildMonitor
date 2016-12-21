@@ -109,7 +109,7 @@ public class ProjectSummaryAdapter extends SelectableRecyclerAdapter<ProjectSumm
 
             name.setText(item.name);
             status.setText(item.isRunning ? "[Running] " + item.status + " " + item.percentageComplete +"%" : item.status.toString());
-            startTime.setText(TimeUtil.human(item.startDate));
+            startTime.setText(TimeUtil.human(item.startDate, false));
 
             if(item.status == BuildStatus.FailedToLoad){
                 status.setTextColor(context.getColor(R.color.orange_stoke));
